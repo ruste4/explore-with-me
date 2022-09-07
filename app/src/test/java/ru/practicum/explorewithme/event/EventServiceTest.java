@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.explorewithme.event.category.Category;
 import ru.practicum.explorewithme.event.dto.EventCreateDto;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
+import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 import ru.practicum.explorewithme.event.exception.EventDateInvalidException;
 import ru.practicum.explorewithme.event.exception.EventUpdatingIsProhibitedException;
@@ -21,6 +22,7 @@ import ru.practicum.explorewithme.user.User;
 import javax.transaction.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
@@ -197,6 +199,32 @@ class EventServiceTest {
         assertThrows(
                 EventDateInvalidException.class,
                 () -> eventService.updateEventByInitiatorId(userId, eventUpdateDto)
+        );
+    }
+
+    @Test
+    public void getEventsByInitiatorIdSuccess() {
+        User user1 = userSupplier.get();
+        Long userId1 = testEntityManager.persistAndGetId(user1, Long.class);
+        User user2 = userSupplier.get();
+        Long userId2 = testEntityManager.persistAndGetId(user2, Long.class);
+        EventCreateDto eventCreateDto1 = createDtoSupplier.get();
+        EventCreateDto eventCreateDto2 = createDtoSupplier.get();
+        EventCreateDto eventCreateDto3 = createDtoSupplier.get();
+
+        EventFullDto createdEvent1= eventService.addEvent(userId1, eventCreateDto1);
+        EventFullDto createdEvent2 = eventService.addEvent(userId1, eventCreateDto2);
+        EventFullDto createdEvent3 = eventService.addEvent(userId2, eventCreateDto3);
+
+        List<EventShortDto> resultByUser1 = eventService.getEventsByInitiatorId(userId1, 0, 10);
+        List<EventShortDto> resultByUser2 = eventService.getEventsByInitiatorId(userId2, 0, 10);
+
+        assertAll(
+                () -> assertEquals(resultByUser1.size(), 2),
+                () -> assertEquals(resultByUser2.size(), 1),
+                () -> assertEquals(resultByUser1.get(0).getAnnotation(), createdEvent1.getAnnotation()),
+                () -> assertEquals(resultByUser1.get(1).getAnnotation(), createdEvent2.getAnnotation()),
+                () -> assertEquals(resultByUser2.get(0).getAnnotation(), createdEvent3.getAnnotation())
         );
     }
 

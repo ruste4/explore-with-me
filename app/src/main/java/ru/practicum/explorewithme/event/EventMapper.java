@@ -2,6 +2,7 @@ package ru.practicum.explorewithme.event;
 
 import ru.practicum.explorewithme.event.dto.EventCreateDto;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
+import ru.practicum.explorewithme.event.dto.EventShortDto;
 
 public class EventMapper {
     public static Event toEvent(EventCreateDto createDto) {
@@ -41,6 +42,29 @@ public class EventMapper {
                 .publishedOn(event.getPublishedOn())
                 .requestModeration(event.isRequestModeration())
                 .state(event.getState())
+                .title(event.getTitle())
+                .build();
+    }
+
+    public static EventShortDto toEventShortDto(Event event) {
+
+        EventShortDto.Category category = EventShortDto.Category.builder()
+                .id(event.getCategory().getId())
+                .name(event.getCategory().getName())
+                .build();
+
+        EventShortDto.User initiator = EventShortDto.User.builder()
+                .id(event.getInitiator().getId())
+                .name(event.getInitiator().getName())
+                .build();
+
+        return EventShortDto.builder()
+                .id(event.getId())
+                .annotation(event.getAnnotation())
+                .category(category)
+                .eventDate(event.getEventDate())
+                .initiator(initiator)
+                .paid(event.isPaid())
                 .title(event.getTitle())
                 .build();
     }

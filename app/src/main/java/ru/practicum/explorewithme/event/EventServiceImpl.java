@@ -1,6 +1,7 @@
 package ru.practicum.explorewithme.event;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.explorewithme.event.category.Category;
 import ru.practicum.explorewithme.event.category.CategoryRepository;
@@ -12,9 +13,9 @@ import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 import ru.practicum.explorewithme.event.exception.*;
 import ru.practicum.explorewithme.event.requestParams.GetEventsParams;
 import ru.practicum.explorewithme.event.requestParams.SearchEventParams;
-import ru.practicum.explorewithme.user.UserMapper;
-import ru.practicum.explorewithme.user.UserService;
-import ru.practicum.explorewithme.user.dto.UserFullDto;
+import ru.practicum.explorewithme.user.User;
+import ru.practicum.explorewithme.user.UserRepository;
+import ru.practicum.explorewithme.user.exception.UserNotFoundException;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -25,7 +26,7 @@ import java.util.List;
 @Transactional
 public class EventServiceImpl implements EventService {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
 
     private final EventRepository eventRepository;
@@ -39,23 +40,30 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventById(long id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(
-                        () -> new EventNotFoundException(String.format("Event with id:%s not found", id))
-                );
+        Event event = eventRepository.findById(id).orElseThrow(
+                () -> new EventNotFoundException(String.format("Event with id:%s not found", id)));
+
         return EventMapper.toEventFullDto(event);
     }
 
     @Override
     public List<EventShortDto> getEventsByInitiatorId(long userId, int from, int size) {
-        return null;
+        User initiator = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException(String.format("User with id:%s not found", userId))
+        );
+
+        PageRequest pageRequest = PageRequest.of(from, size);
+
+        return eventRepository.findAllByInitiator(initiator, pageRequest).map(EventMapper::toEventShortDto).toList(); //todo в этом месте каждому EventShortDto згенерируй поля confirmedRequests, views
     }
 
     @Override
     public EventFullDto updateEventByInitiatorId(long userId, EventUpdateDto eventUpdateDto) {
         LocalDateTime now = LocalDateTime.now();
 
-        UserFullDto initiator = userService.findUserById(userId);
+        User initiator = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException(String.format("User with id:%s not found", userId))
+        );
 
         long eventId = eventUpdateDto.getId();
 
@@ -129,7 +137,9 @@ public class EventServiceImpl implements EventService {
         LocalDateTime now = LocalDateTime.now();
         boolean isValidEventDate = eventCreateDto.getEventDate().minusHours(BAN_HOURS_BEFORE_EVENT).isAfter(now);
 
-        UserFullDto user = userService.findUserById(userId);
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException(String.format("User with id:%s not found", userId))
+        );
 
         if (!user.isActivated()) {
             throw new UserInActivatedException(String.format("User with id:%s is not activated", userId));
@@ -151,7 +161,7 @@ public class EventServiceImpl implements EventService {
 
         event.setCreatedOn(now);
 
-        event.setInitiator(UserMapper.toUser(user));
+        event.setInitiator(user);
 
         event.setState(EventState.PENDING);
 

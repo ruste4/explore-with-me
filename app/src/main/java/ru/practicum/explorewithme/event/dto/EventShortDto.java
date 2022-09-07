@@ -5,6 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class EventShortDto {
 
     private long id;
@@ -26,6 +27,7 @@ public class EventShortDto {
     private int views;
 
     @Data
+    @Builder
     public static class Category {
 
         private long id;
@@ -35,6 +37,7 @@ public class EventShortDto {
     }
 
     @Data
+    @Builder
     public static class User {
 
         private long id;
