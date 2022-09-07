@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class EventCreateDto {
 
     @NotBlank
@@ -37,6 +38,7 @@ public class EventCreateDto {
     private String title;
 
     @Data
+    @AllArgsConstructor
     public static class Location {
 
         private int lat;

@@ -6,6 +6,7 @@ import ru.practicum.explorewithme.event.EventState;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class EventFullDto {
 
     private long id;
@@ -39,6 +40,7 @@ public class EventFullDto {
     private int views;
 
     @Data
+    @AllArgsConstructor
     public static class Category {
 
         private long id;
@@ -48,6 +50,7 @@ public class EventFullDto {
     }
 
     @Data
+    @AllArgsConstructor
     public static class User {
 
         private long id;

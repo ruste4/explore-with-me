@@ -1,6 +1,7 @@
 package ru.practicum.explorewithme.event;
 
 import lombok.*;
+import ru.practicum.explorewithme.event.category.Category;
 import ru.practicum.explorewithme.user.User;
 
 import javax.persistence.*;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Event {
@@ -51,7 +53,7 @@ public class Event {
     @Column(name = "request_moderation")
     private boolean requestModeration;
 
-    @Column(name = "state")
+    @Column(name = "in_state")
     private EventState state;
 
     @Column(name = "title")
