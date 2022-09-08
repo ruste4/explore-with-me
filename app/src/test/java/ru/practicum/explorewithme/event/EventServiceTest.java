@@ -17,6 +17,7 @@ import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 import ru.practicum.explorewithme.event.exception.EventDateInvalidException;
 import ru.practicum.explorewithme.event.exception.EventUpdatingIsProhibitedException;
 import ru.practicum.explorewithme.event.exception.UserInActivatedException;
+import ru.practicum.explorewithme.event.requestParams.SearchEventParams;
 import ru.practicum.explorewithme.user.User;
 
 import javax.transaction.Transactional;
@@ -212,7 +213,7 @@ class EventServiceTest {
         EventCreateDto eventCreateDto2 = createDtoSupplier.get();
         EventCreateDto eventCreateDto3 = createDtoSupplier.get();
 
-        EventFullDto createdEvent1= eventService.addEvent(userId1, eventCreateDto1);
+        EventFullDto createdEvent1 = eventService.addEvent(userId1, eventCreateDto1);
         EventFullDto createdEvent2 = eventService.addEvent(userId1, eventCreateDto2);
         EventFullDto createdEvent3 = eventService.addEvent(userId2, eventCreateDto3);
 
@@ -238,7 +239,7 @@ class EventServiceTest {
 
         EventFullDto foundEvent = eventService.getEventCurrentUserById(userId, eventId);
 
-        assertEquals(foundEvent.getAnnotation(),event.getAnnotation());
+        assertEquals(foundEvent.getAnnotation(), event.getAnnotation());
     }
 
     @Test
@@ -252,6 +253,53 @@ class EventServiceTest {
         eventService.cancelEventAddedCurrentUserById(userId, eventId);
 
         assertEquals(testEntityManager.find(Event.class, eventId).getState(), EventState.CANCELED);
+    }
+
+    @Test
+    public void searchEventsSuccess() {
+        // Добавить первое событие первого пользователя
+        User user1 = userSupplier.get();
+        Long userId1 = testEntityManager.persistAndGetId(user1, Long.class);
+        Event event1 = eventSupplier.get();
+        event1.setInitiator(user1);
+        Long eventId1 = testEntityManager.persistAndGetId(event1, Long.class);
+
+        // Добавить второе событие первого пользователя
+        Event event2 = eventSupplier.get();
+        event2.setInitiator(user1);
+        Long eventId2 = testEntityManager.persistAndGetId(event2, Long.class);
+
+        //Добавляем первое событие второго пользователя
+        User user2 = userSupplier.get();
+        Long userId2 = testEntityManager.persistAndGetId(user2, Long.class);
+        Event event3 = eventSupplier.get();
+        event3.setInitiator(user2);
+        event3.setCategory(event2.getCategory());
+        Long eventId3 = testEntityManager.persistAndGetId(event3, Long.class);
+
+        long[] userIds = {userId1};
+        long[] categoryIds = {event2.getCategory().getId(), event1.getCategory().getId()};
+        String[] states = {"PENDING"};
+
+        SearchEventParams params = new SearchEventParams();
+        params.setUsers(userIds);
+        params.setCategories(categoryIds);
+        params.setStates(states);
+        params.setRangeStart(LocalDateTime.now().minusMonths(1));
+        params.setRangeEnd(LocalDateTime.now().plusMonths(1));
+        params.setFrom(0);
+        params.setSize(10);
+
+        assertAll(
+                () -> assertEquals(eventService.searchEvents(params).size(), 2),
+                () -> {
+                    long[] userIdsWithTwoUsers = {userId1, userId2};
+                    params.setUsers(userIdsWithTwoUsers);
+                    assertEquals(eventService.searchEvents(params).size(), 3);
+                }
+        );
+        ;
+
     }
 
 }

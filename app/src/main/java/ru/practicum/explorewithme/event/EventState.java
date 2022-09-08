@@ -20,13 +20,13 @@ public enum EventState {
         return val;
     }
 
-    public static Optional<EventState> findByName(String name) {
+    public static EventState findByName(String name) {
         for (EventState status : values()) {
             if (status.name().equalsIgnoreCase(name)) {
-                return Optional.of(status);
+                return status;
             }
         }
 
-        return Optional.empty();
+        throw new IllegalArgumentException(String.format("EventState with name:%s not exist", name));
     }
 }

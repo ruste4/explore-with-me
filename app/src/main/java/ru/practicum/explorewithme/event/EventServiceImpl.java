@@ -217,7 +217,13 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventFullDto> searchEvents(SearchEventParams params) {
-        return null;
+        PageRequest pageRequest = PageRequest.of(params.getFrom(), params.getSize());
+        return eventRepository.findAll(EventSpecs
+                .hasInitiationIds(params.getUsers())
+                .and(EventSpecs.hasEventStates(params.getStates()))
+                .and(EventSpecs.hasEventCategory(params.getCategories())),
+                pageRequest
+        ).map(EventMapper::toEventFullDto).toList();
     }
 
     private Event findEventById(long id) {
