@@ -49,26 +49,17 @@ public class EventServiceImpl implements EventService {
 
         PageRequest pageRequest = PageRequest.of(from, size);
 
-        return eventRepository.findAllByInitiator(initiator, pageRequest).map(EventMapper::toEventShortDto).toList(); //todo в этом месте каждому EventShortDto згенерируй поля confirmedRequests, views
+        return eventRepository.findAllByInitiator(initiator, pageRequest).map(EventMapper::toEventShortDto).toList(); // todo в этом месте каждому EventShortDto згенерируй поля confirmedRequests, views
     }
 
     @Override
     public EventFullDto updateEventByInitiatorId(long userId, EventUpdateDto eventUpdateDto) {
 
-        User initiator = findUserById(userId);
-
         long eventId = eventUpdateDto.getId();
 
         Event event = findEventById(eventId);
 
-        boolean isInitiator = initiator.getId().equals(event.getInitiator().getId());
-
-        if (!isInitiator) {
-            throw new UserIsNotInitiatorException(String.format(
-                    "User with id:%s is not the initiator of the event with id:%s",
-                    initiator.getId(),
-                    event.getId()));
-        }
+        isInitiatorOrException(event, userId);
 
         return updateEventById(eventId, eventUpdateDto);
     }
@@ -163,9 +154,9 @@ public class EventServiceImpl implements EventService {
 
         EventFullDto eventFullDto = EventMapper.toEventFullDto(event);
 
-        //todo посчитай количестов запросов и запиши в eventFullDto
+        // todo посчитай количестов запросов и запиши в eventFullDto
 
-        //todo посчитай количество просмотров из сервера статистики и запиши в eventFullDto
+        // todo посчитай количество просмотров из сервера статистики и запиши в eventFullDto
 
         return eventFullDto;
 
@@ -173,27 +164,18 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventCurrentUserById(long userId, long eventId) {
-        EventFullDto event = getEventById(eventId);
+        Event event = findEventById(eventId);
 
-        if (event.getInitiator().getId() != userId) {
-            throw new UserIsNotInitiatorException(
-                    String.format("User with id:%s not initiator of event with id:%s", userId, eventId)
-            );
-        }
+        isInitiatorOrException(event, userId);
 
-        return event;
+        return EventMapper.toEventFullDto(event);
     }
 
     @Override
     public EventFullDto cancelEventAddedCurrentUserById(long userId, long eventId) {
         Event event = findEventById(eventId);
-        boolean isInitiator = event.getInitiator().getId().equals(userId);
 
-        if (!isInitiator) {
-            throw new UserIsNotInitiatorException(
-                    String.format("User with id:%s is not the initiator of the event with id:%s",userId,event.getId())
-            );
-        }
+        isInitiatorOrException(event, userId);
 
         event.setState(EventState.CANCELED);
 
@@ -219,9 +201,9 @@ public class EventServiceImpl implements EventService {
     public List<EventFullDto> searchEvents(SearchEventParams params) {
         PageRequest pageRequest = PageRequest.of(params.getFrom(), params.getSize());
         return eventRepository.findAll(EventSpecs
-                .hasInitiationIds(params.getUsers())
-                .and(EventSpecs.hasEventStates(params.getStates()))
-                .and(EventSpecs.hasEventCategory(params.getCategories())),
+                        .hasInitiationIds(params.getUsers())
+                        .and(EventSpecs.hasEventStates(params.getStates()))
+                        .and(EventSpecs.hasEventCategory(params.getCategories())),
                 pageRequest
         ).map(EventMapper::toEventFullDto).toList();
     }
@@ -236,5 +218,15 @@ public class EventServiceImpl implements EventService {
         return userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException(String.format("User with id:%s not found", id))
         );
+    }
+
+    private void isInitiatorOrException(Event event, long userId) {
+        boolean isInitiator = event.getInitiator().getId().equals(userId);
+
+        if (!isInitiator) {
+            throw new UserIsNotInitiatorException(
+                    String.format("User with id:%s is not the initiator of the event with id:%s", userId, event.getId())
+            );
+        }
     }
 }
