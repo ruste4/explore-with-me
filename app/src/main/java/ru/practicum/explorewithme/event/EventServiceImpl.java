@@ -40,17 +40,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventById(long id) {
-        Event event = eventRepository.findById(id).orElseThrow(
-                () -> new EventNotFoundException(String.format("Event with id:%s not found", id)));
-
-        return EventMapper.toEventFullDto(event);
+        return EventMapper.toEventFullDto(findEventById(id));
     }
 
     @Override
     public List<EventShortDto> getEventsByInitiatorId(long userId, int from, int size) {
-        User initiator = userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException(String.format("User with id:%s not found", userId))
-        );
+        User initiator = findUserById(userId);
 
         PageRequest pageRequest = PageRequest.of(from, size);
 
@@ -60,20 +55,17 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto updateEventByInitiatorId(long userId, EventUpdateDto eventUpdateDto) {
 
-        User initiator = userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException(String.format("User with id:%s not found", userId))
-        );
+        User initiator = findUserById(userId);
 
         long eventId = eventUpdateDto.getId();
 
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EventNotFoundException(String.format("Event with id:%s not found", eventId)));
+        Event event = findEventById(eventId);
 
         boolean isInitiator = initiator.getId().equals(event.getInitiator().getId());
 
         if (!isInitiator) {
             throw new UserIsNotInitiatorException(String.format(
-                    "the user with id:%s is not the initiator of the event with id:%s",
+                    "User with id:%s is not the initiator of the event with id:%s",
                     initiator.getId(),
                     event.getId()));
         }
@@ -85,8 +77,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto updateEventById(long eventId, EventUpdateDto eventUpdateDto) {
         LocalDateTime now = LocalDateTime.now();
 
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EventNotFoundException(String.format("Event with id:%s not found", eventId)));
+        Event event = findEventById(eventId);
 
         boolean isValidEventState = event.getState().equals(EventState.PENDING)
                 || event.getState().equals(EventState.CANCELED);
@@ -142,9 +133,7 @@ public class EventServiceImpl implements EventService {
         LocalDateTime now = LocalDateTime.now();
         boolean isValidEventDate = eventCreateDto.getEventDate().minusHours(BAN_HOURS_BEFORE_EVENT).isAfter(now);
 
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException(String.format("User with id:%s not found", userId))
-        );
+        User user = findUserById(userId);
 
         if (!user.isActivated()) {
             throw new UserInActivatedException(String.format("User with id:%s is not activated", userId));
@@ -197,7 +186,18 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto cancelEventAddedCurrentUserById(long userId, long eventId) {
-        return null;
+        Event event = findEventById(eventId);
+        boolean isInitiator = event.getInitiator().getId().equals(userId);
+
+        if (!isInitiator) {
+            throw new UserIsNotInitiatorException(
+                    String.format("User with id:%s is not the initiator of the event with id:%s",userId,event.getId())
+            );
+        }
+
+        event.setState(EventState.CANCELED);
+
+        return EventMapper.toEventFullDto(event);
     }
 
     @Override
@@ -218,5 +218,17 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventFullDto> searchEvents(SearchEventParams params) {
         return null;
+    }
+
+    private Event findEventById(long id) {
+        return eventRepository.findById(id).orElseThrow(
+                () -> new EventNotFoundException(String.format("Event with id:%s not found", id))
+        );
+    }
+
+    private User findUserById(long id) {
+        return userRepository.findById(id).orElseThrow(
+                () -> new UserNotFoundException(String.format("User with id:%s not found", id))
+        );
     }
 }

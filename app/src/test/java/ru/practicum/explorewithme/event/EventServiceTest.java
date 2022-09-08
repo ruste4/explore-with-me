@@ -241,4 +241,17 @@ class EventServiceTest {
         assertEquals(foundEvent.getAnnotation(),event.getAnnotation());
     }
 
+    @Test
+    public void cancelEventAddedCurrentUserByIdSuccess() {
+        User user = userSupplier.get();
+        Long userId = testEntityManager.persistAndGetId(user, Long.class);
+        Event event = eventSupplier.get();
+        event.setInitiator(user);
+        Long eventId = testEntityManager.persistAndGetId(event, Long.class);
+
+        eventService.cancelEventAddedCurrentUserById(userId, eventId);
+
+        assertEquals(testEntityManager.find(Event.class, eventId).getState(), EventState.CANCELED);
+    }
+
 }
