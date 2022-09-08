@@ -228,4 +228,17 @@ class EventServiceTest {
         );
     }
 
+    @Test
+    public void getEventCurrentUserByIdSuccess() {
+        User user = userSupplier.get();
+        Long userId = testEntityManager.persistAndGetId(user, Long.class);
+        Event event = eventSupplier.get();
+        event.setInitiator(user);
+        Long eventId = testEntityManager.persistAndGetId(event, Long.class);
+
+        EventFullDto foundEvent = eventService.getEventCurrentUserById(userId, eventId);
+
+        assertEquals(foundEvent.getAnnotation(),event.getAnnotation());
+    }
+
 }

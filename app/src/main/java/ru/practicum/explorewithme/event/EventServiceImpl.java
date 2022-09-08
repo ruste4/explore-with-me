@@ -184,7 +184,15 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventCurrentUserById(long userId, long eventId) {
-        return null;
+        EventFullDto event = getEventById(eventId);
+
+        if (event.getInitiator().getId() != userId) {
+            throw new UserIsNotInitiatorException(
+                    String.format("User with id:%s not initiator of event with id:%s", userId, eventId)
+            );
+        }
+
+        return event;
     }
 
     @Override
