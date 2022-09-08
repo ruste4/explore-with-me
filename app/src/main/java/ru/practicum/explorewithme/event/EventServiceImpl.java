@@ -59,7 +59,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto updateEventByInitiatorId(long userId, EventUpdateDto eventUpdateDto) {
-        LocalDateTime now = LocalDateTime.now();
 
         User initiator = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException(String.format("User with id:%s not found", userId))
@@ -72,15 +71,26 @@ public class EventServiceImpl implements EventService {
 
         boolean isInitiator = initiator.getId().equals(event.getInitiator().getId());
 
-        boolean isValidEventState = event.getState().equals(EventState.PENDING)
-                || event.getState().equals(EventState.CANCELED);
-
         if (!isInitiator) {
             throw new UserIsNotInitiatorException(String.format(
                     "the user with id:%s is not the initiator of the event with id:%s",
                     initiator.getId(),
                     event.getId()));
         }
+
+        return updateEventById(eventId, eventUpdateDto);
+    }
+
+    @Override
+    public EventFullDto updateEventById(long eventId, EventUpdateDto eventUpdateDto) {
+        LocalDateTime now = LocalDateTime.now();
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException(String.format("Event with id:%s not found", eventId)));
+
+        boolean isValidEventState = event.getState().equals(EventState.PENDING)
+                || event.getState().equals(EventState.CANCELED);
+
 
         if (!isValidEventState) {
             throw new EventUpdatingIsProhibitedException("To update an event, its status must be CANCELED or PENDING");
@@ -125,11 +135,6 @@ public class EventServiceImpl implements EventService {
         }
 
         return EventMapper.toEventFullDto(event);
-    }
-
-    @Override
-    public EventFullDto updateEventById(long eventId, EventUpdateDto eventUpdateDto) {
-        return null;
     }
 
     @Override
