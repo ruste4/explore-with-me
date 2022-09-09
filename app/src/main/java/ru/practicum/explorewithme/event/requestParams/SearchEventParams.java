@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.event.requestParams;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
