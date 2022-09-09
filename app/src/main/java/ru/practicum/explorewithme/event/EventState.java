@@ -21,9 +21,9 @@ public enum EventState {
     }
 
     public static EventState findByName(String name) {
-        for (EventState status : values()) {
-            if (status.name().equalsIgnoreCase(name)) {
-                return status;
+        for (EventState state : values()) {
+            if (state.name().equalsIgnoreCase(name)) {
+                return state;
             }
         }
 

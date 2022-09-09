@@ -1,26 +1,27 @@
-package ru.practicum.explorewithme.event;
+package ru.practicum.explorewithme.request;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import java.util.stream.Stream;
 
 @Converter
-public class EventStatusConverter implements AttributeConverter<EventState, String> {
+public class RequestStatusConverter implements AttributeConverter<RequestStatus, String> {
     @Override
-    public String convertToDatabaseColumn(EventState eventState) {
-        if (eventState == null) {
+    public String convertToDatabaseColumn(RequestStatus requestStatus) {
+        if (requestStatus == null) {
             return null;
         }
-        return eventState.getVal();
+
+        return requestStatus.getVal();
     }
 
     @Override
-    public EventState convertToEntityAttribute(String s) {
+    public RequestStatus convertToEntityAttribute(String s) {
         if (s == null) {
             return null;
         }
 
-        return Stream.of(EventState.values())
+        return Stream.of(RequestStatus.values())
                 .filter(es -> es.getVal().equals(s))
                 .findFirst()
                 .orElseThrow(IllegalArgumentException::new);
