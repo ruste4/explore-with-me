@@ -12,7 +12,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.explorewithme.event.Event;
 import ru.practicum.explorewithme.event.EventState;
 import ru.practicum.explorewithme.event.category.Category;
+import ru.practicum.explorewithme.request.dto.RequestCreateDto;
 import ru.practicum.explorewithme.request.dto.RequestFullDto;
+import ru.practicum.explorewithme.request.exception.ParticipantLimitExceededException;
+import ru.practicum.explorewithme.request.exception.RequestAlreadyExistException;
+import ru.practicum.explorewithme.request.exception.RequestUnpublishedEventException;
+import ru.practicum.explorewithme.request.exception.RequesterIsInitiatorEventException;
 import ru.practicum.explorewithme.user.User;
 
 import javax.transaction.Transactional;
@@ -123,4 +128,105 @@ class RequestServiceTest {
         );
     }
 
+    @Test
+    public void addEventRequestSuccess() {
+        Map<Long, Event> eventMap = generateAndPersistEvent(1);
+        Event event = eventMap.values().stream().findFirst().get();
+        event.setState(EventState.PUBLISHED);
+        User requester = generateAndPersistUser();
+
+        RequestCreateDto createDto = new RequestCreateDto(event.getId());
+        RequestFullDto createdRequest = requestService.addEventRequest(requester.getId(), createDto);
+        Request foundRequest = testEntityManager.find(Request.class, createdRequest.getId());
+
+        assertAll(
+                () -> assertEquals(foundRequest.getRequester().getId(), requester.getId()),
+                () -> assertEquals(foundRequest.getEvent().getId(), event.getId())
+        );
+
+    }
+    @Test
+    public void addEventRequestFailParticipantLimitExceeded() {
+        Map<Long, Event> eventMap = generateAndPersistEvent(1);
+        Event event = eventMap.values().stream().findFirst().get();
+        event.setState(EventState.PUBLISHED);
+        event.setParticipantLimit(1);
+        User firstRequester = generateAndPersistUser();
+        User secondRequester = generateAndPersistUser();
+        RequestCreateDto createDto = new RequestCreateDto(event.getId());
+
+        requestService.addEventRequest(firstRequester.getId(), createDto);
+
+        assertThrows(ParticipantLimitExceededException.class,
+                () -> requestService.addEventRequest(secondRequester.getId(), createDto)
+        );
+    }
+
+    @Test
+    public void addEventRequestFailRequestUnpublishedEvent() {
+        Map<Long, Event> eventMap = generateAndPersistEvent(1);
+        Event event = eventMap.values().stream().findFirst().get();
+        User requester = generateAndPersistUser();
+        RequestCreateDto createDto = new RequestCreateDto(event.getId());
+
+        assertThrows(RequestUnpublishedEventException.class,
+                () -> requestService.addEventRequest(requester.getId(), createDto)
+        );
+    }
+
+    @Test
+    public void addEventRequestFailUserIsInitiatorEvent() {
+        Map<Long, Event> eventMap = generateAndPersistEvent(1);
+        Event event = eventMap.values().stream().findFirst().get();
+        event.setState(EventState.PUBLISHED);
+        RequestCreateDto createDto = new RequestCreateDto(event.getId());
+
+        assertThrows(RequesterIsInitiatorEventException.class,
+                () -> requestService.addEventRequest(event.getInitiator().getId(), createDto)
+        );
+    }
+
+    @Test
+    public void addEventRequestFailRequestAlreadyExist() {
+        Map<Long, Event> eventMap = generateAndPersistEvent(1);
+        Event event = eventMap.values().stream().findFirst().get();
+        event.setState(EventState.PUBLISHED);
+        User requester = generateAndPersistUser();
+        RequestCreateDto createDto = new RequestCreateDto(event.getId());
+        requestService.addEventRequest(requester.getId(), createDto);
+
+        assertThrows(RequestAlreadyExistException.class,
+                () -> requestService.addEventRequest(requester.getId(), new RequestCreateDto(event.getId()))
+        );
+    }
+
+    @Test
+    public void addEventRequestSuccessRequestStatePublishedWithRequestModerationOf() {
+        Map<Long, Event> eventMap = generateAndPersistEvent(1);
+        Event event = eventMap.values().stream().findFirst().get();
+        event.setState(EventState.PUBLISHED);
+        event.setRequestModeration(false);
+        User requester = generateAndPersistUser();
+        RequestCreateDto createDto = new RequestCreateDto(event.getId());
+        RequestFullDto addedRequest = requestService.addEventRequest(requester.getId(), createDto);
+
+        Request foundRequest = testEntityManager.find(Request.class, addedRequest.getId());
+
+        assertEquals(foundRequest.getStatus(), RequestStatus.PUBLISHED);
+    }
+
+    @Test
+    public void addEventRequestSuccessRequestStatePendingWithRequestModerationOn() {
+        Map<Long, Event> eventMap = generateAndPersistEvent(1);
+        Event event = eventMap.values().stream().findFirst().get();
+        event.setState(EventState.PUBLISHED);
+        event.setRequestModeration(true);
+        User requester = generateAndPersistUser();
+        RequestCreateDto createDto = new RequestCreateDto(event.getId());
+        RequestFullDto addedRequest = requestService.addEventRequest(requester.getId(), createDto);
+
+        Request foundRequest = testEntityManager.find(Request.class, addedRequest.getId());
+
+        assertEquals(foundRequest.getStatus(), RequestStatus.PENDING);
+    }
 }
