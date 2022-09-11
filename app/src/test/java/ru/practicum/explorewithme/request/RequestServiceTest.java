@@ -14,10 +14,7 @@ import ru.practicum.explorewithme.event.EventState;
 import ru.practicum.explorewithme.event.category.Category;
 import ru.practicum.explorewithme.request.dto.RequestCreateDto;
 import ru.practicum.explorewithme.request.dto.RequestFullDto;
-import ru.practicum.explorewithme.request.exception.ParticipantLimitExceededException;
-import ru.practicum.explorewithme.request.exception.RequestAlreadyExistException;
-import ru.practicum.explorewithme.request.exception.RequestUnpublishedEventException;
-import ru.practicum.explorewithme.request.exception.RequesterIsInitiatorEventException;
+import ru.practicum.explorewithme.request.exception.*;
 import ru.practicum.explorewithme.user.User;
 
 import javax.transaction.Transactional;
@@ -228,5 +225,48 @@ class RequestServiceTest {
         Request foundRequest = testEntityManager.find(Request.class, addedRequest.getId());
 
         assertEquals(foundRequest.getStatus(), RequestStatus.PENDING);
+    }
+
+    @Test
+    public void cancelEventRequestCurrentUserSuccess() {
+        Map<Long, Event> eventMap = generateAndPersistEvent(1);
+        Event event = eventMap.values().stream().findFirst().get();
+        event.setState(EventState.PUBLISHED);
+        User requester = generateAndPersistUser();
+
+        Request request = Request.builder()
+                .event(event)
+                .requester(requester)
+                .status(RequestStatus.PENDING)
+                .created(LocalDateTime.now())
+                .build();
+
+        testEntityManager.persistAndFlush(request);
+
+        RequestFullDto canceledReq = requestService.cancelEventRequestCurrentUser(requester.getId(), request.getId());
+
+        assertEquals(canceledReq.getStatus(), RequestStatus.CANCELED);
+    }
+
+    @Test
+    public void cancelEventRequestCurrentUserFailUserIsNotRequester() {
+        Map<Long, Event> eventMap = generateAndPersistEvent(1);
+        Event event = eventMap.values().stream().findFirst().get();
+        event.setState(EventState.PUBLISHED);
+        User requester = generateAndPersistUser();
+        User otherUser = generateAndPersistUser();
+
+        Request request = Request.builder()
+                .event(event)
+                .requester(requester)
+                .status(RequestStatus.PENDING)
+                .created(LocalDateTime.now())
+                .build();
+
+        testEntityManager.persistAndFlush(request);
+
+        assertThrows(UserNotRequesterForEventRequestException.class,
+                () -> requestService.cancelEventRequestCurrentUser(otherUser.getId(), request.getId())
+        );
     }
 }

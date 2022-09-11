@@ -53,14 +53,6 @@ public class RequestServiceImpl implements RequestService {
         return RequestMapper.toRequestFullDto(requestRepository.save(newRequest));
     }
 
-    /*
-        1) нельзя добавить повторный запрос
-        2) инициатор события не может добавить запрос на участие в своём событии
-        3) нельзя участвовать в неопубликованном событии
-        4) если у события достигнут лимит запросов на участие - необходимо вернуть ошибку
-        5) если для события отключена пре-модерация запросов на участие, то запрос должен автоматически перейти в состояние подтвержденного
-    */
-
     @Override
     public List<RequestFullDto> getEventRequestsFromCurrentUser(long userId) {
 
@@ -75,7 +67,18 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public RequestFullDto cancelEventRequestCurrentUser(long userId, long requestId) {
-        return null;
+        User user = findUserById(userId);
+        Request request = findRequestById(requestId);
+
+        if (!request.getRequester().equals(user)) {
+            throw new UserNotRequesterForEventRequestException(
+                    String.format("User with id:%s does not requester for request with id:%s", userId, requestId)
+            );
+        }
+
+        request.setStatus(RequestStatus.CANCELED);
+
+        return RequestMapper.toRequestFullDto(request);
     }
 
     private Event findEventById(long id) {
