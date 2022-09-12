@@ -13,6 +13,8 @@ import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 import ru.practicum.explorewithme.event.exception.*;
 import ru.practicum.explorewithme.event.requestParams.GetEventsParams;
 import ru.practicum.explorewithme.event.requestParams.SearchEventParams;
+import ru.practicum.explorewithme.request.RequestRepository;
+import ru.practicum.explorewithme.request.RequestStatus;
 import ru.practicum.explorewithme.user.User;
 import ru.practicum.explorewithme.user.UserRepository;
 import ru.practicum.explorewithme.user.exception.UserNotFoundException;
@@ -27,9 +29,12 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
 
     private final UserRepository userRepository;
+
     private final CategoryRepository categoryRepository;
 
     private final EventRepository eventRepository;
+
+    private final RequestRepository requestRepository;
 
     private static final int BAN_HOURS_BEFORE_EVENT = 2;
 
@@ -40,7 +45,11 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventById(long id) {
-        return EventMapper.toEventFullDto(findEventById(id));
+        Event event = findEventById(id);
+        int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
+        EventFullDto fullDto = EventMapper.toEventFullDto(event);
+        fullDto.setConfirmedRequests(confirmedRequestCount);
+        return fullDto;
     }
 
     @Override
@@ -49,7 +58,16 @@ public class EventServiceImpl implements EventService {
 
         PageRequest pageRequest = PageRequest.of(from, size);
 
-        return eventRepository.findAllByInitiator(initiator, pageRequest).map(EventMapper::toEventShortDto).toList(); // todo в этом месте каждому EventShortDto згенерируй поля confirmedRequests, views
+        return eventRepository
+                .findAllByInitiator(initiator, pageRequest)
+                .map(event -> {
+                    int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
+                    EventShortDto shortDto = EventMapper.toEventShortDto(event);
+                    shortDto.setConfirmedRequests(confirmedRequestCount);
+
+                    return shortDto;
+                })
+                .toList(); // todo в этом месте каждому EventShortDto згенерируй views
     }
 
     @Override
@@ -116,7 +134,11 @@ public class EventServiceImpl implements EventService {
             event.setTitle(eventUpdateDto.getTitle());
         }
 
-        return EventMapper.toEventFullDto(event);
+        int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
+        EventFullDto fullDto = EventMapper.toEventFullDto(event);
+        fullDto.setConfirmedRequests(confirmedRequestCount);
+        //todo запиши view
+        return fullDto;
     }
 
     @Override
@@ -152,13 +174,7 @@ public class EventServiceImpl implements EventService {
 
         eventRepository.save(event);
 
-        EventFullDto eventFullDto = EventMapper.toEventFullDto(event);
-
-        // todo посчитай количестов запросов и запиши в eventFullDto
-
-        // todo посчитай количество просмотров из сервера статистики и запиши в eventFullDto
-
-        return eventFullDto;
+        return EventMapper.toEventFullDto(event);
 
     }
 
@@ -168,7 +184,11 @@ public class EventServiceImpl implements EventService {
 
         isInitiatorOrException(event, userId);
 
-        return EventMapper.toEventFullDto(event);
+        int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
+        EventFullDto fullDto = EventMapper.toEventFullDto(event);
+        fullDto.setConfirmedRequests(confirmedRequestCount);
+
+        return fullDto;
     }
 
     @Override
@@ -178,6 +198,10 @@ public class EventServiceImpl implements EventService {
         isInitiatorOrException(event, userId);
 
         event.setState(EventState.CANCELED);
+
+        int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
+        EventFullDto fullDto = EventMapper.toEventFullDto(event);
+        fullDto.setConfirmedRequests(confirmedRequestCount);
 
         return EventMapper.toEventFullDto(event);
     }
@@ -205,7 +229,13 @@ public class EventServiceImpl implements EventService {
                         .and(EventSpecs.hasEventStates(params.getStates()))
                         .and(EventSpecs.hasEventCategory(params.getCategories())),
                 pageRequest
-        ).map(EventMapper::toEventFullDto).toList();
+        ).map(event -> {
+            int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
+            EventFullDto fullDto = EventMapper.toEventFullDto(event);
+            fullDto.setConfirmedRequests(confirmedRequestCount);
+
+            return fullDto;
+        }).toList();
     }
 
     private Event findEventById(long id) {
@@ -228,5 +258,9 @@ public class EventServiceImpl implements EventService {
                     String.format("User with id:%s is not the initiator of the event with id:%s", userId, event.getId())
             );
         }
+    }
+
+    private int getConfirmedRequestsCountForEvent(Event event) {
+        return requestRepository.findAllByEventAndStatus(event, RequestStatus.CONFIRMED).size();
     }
 }

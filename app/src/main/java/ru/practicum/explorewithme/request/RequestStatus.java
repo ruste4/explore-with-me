@@ -4,7 +4,7 @@ public enum RequestStatus {
 
     PENDING("PENDING"),
 
-    PUBLISHED("PUBLISHED"),
+    CONFIRMED("CONFIRMED"),
 
     CANCELED("CANCELED");
 

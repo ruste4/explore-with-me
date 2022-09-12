@@ -45,7 +45,7 @@ public class RequestServiceImpl implements RequestService {
         newRequest.setCreated(LocalDateTime.now());
 
         if (!event.isRequestModeration()) {
-            newRequest.setStatus(RequestStatus.PUBLISHED);
+            newRequest.setStatus(RequestStatus.CONFIRMED);
         } else {
             newRequest.setStatus(RequestStatus.PENDING);
         }

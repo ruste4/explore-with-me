@@ -10,8 +10,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEnti
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.explorewithme.event.Event;
+import ru.practicum.explorewithme.event.EventService;
 import ru.practicum.explorewithme.event.EventState;
 import ru.practicum.explorewithme.event.category.Category;
+import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.request.dto.RequestCreateDto;
 import ru.practicum.explorewithme.request.dto.RequestFullDto;
 import ru.practicum.explorewithme.request.exception.*;
@@ -37,6 +39,9 @@ class RequestServiceTest {
 
     @Autowired
     private final RequestService requestService;
+
+    @Autowired
+    private final EventService eventService;
 
     @Autowired
     private final TestEntityManager testEntityManager;
@@ -209,7 +214,7 @@ class RequestServiceTest {
 
         Request foundRequest = testEntityManager.find(Request.class, addedRequest.getId());
 
-        assertEquals(foundRequest.getStatus(), RequestStatus.PUBLISHED);
+        assertEquals(foundRequest.getStatus(), RequestStatus.CONFIRMED);
     }
 
     @Test
@@ -268,5 +273,36 @@ class RequestServiceTest {
         assertThrows(UserNotRequesterForEventRequestException.class,
                 () -> requestService.cancelEventRequestCurrentUser(otherUser.getId(), request.getId())
         );
+    }
+
+    @Test
+    public void testConfirmedRequestCountWithGetEventsByInitiatorId() {
+        Map<Long, Event> eventMap = generateAndPersistEvent(1);
+        Event event = eventMap.values().stream().findFirst().get();
+        event.setState(EventState.PUBLISHED);
+        event.setParticipantLimit(1);
+        User firstRequester = generateAndPersistUser();
+        User secondRequester = generateAndPersistUser();
+
+        Request firstRequest = Request.builder()
+                .event(event)
+                .requester(firstRequester)
+                .status(RequestStatus.CONFIRMED)
+                .created(LocalDateTime.now())
+                .build();
+
+        Request secondRequest = Request.builder()
+                .event(event)
+                .requester(secondRequester)
+                .status(RequestStatus.CONFIRMED)
+                .created(LocalDateTime.now())
+                .build();
+
+        testEntityManager.persist(firstRequest);
+        testEntityManager.persistAndFlush(secondRequest);
+
+        List<EventShortDto> found = eventService.getEventsByInitiatorId(event.getInitiator().getId(), 0, 10);
+
+        assertEquals(found.get(0).getConfirmedRequests(), 2);
     }
 }
