@@ -25,7 +25,7 @@ public class EventFullDto {
 
     private boolean paid;
 
-    private int participantLimit;
+    private long participantLimit;
 
     private LocalDateTime publishedOn;
 

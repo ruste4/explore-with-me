@@ -72,7 +72,7 @@ class RequestServiceTest {
                     .eventDate(LocalDateTime.now().plusDays(1))
                     .paid(false)
                     .initiator(generateAndPersistUser())
-                    .participantLimit(10)
+                    .participantLimit(10l)
                     .requestModeration(true)
                     .title("title " + nanoTime)
                     .createdOn(LocalDateTime.now().plusDays(1))
@@ -152,7 +152,7 @@ class RequestServiceTest {
         Map<Long, Event> eventMap = generateAndPersistEvent(1);
         Event event = eventMap.values().stream().findFirst().get();
         event.setState(EventState.PUBLISHED);
-        event.setParticipantLimit(1);
+        event.setParticipantLimit(1l);
         User firstRequester = generateAndPersistUser();
         User secondRequester = generateAndPersistUser();
         RequestCreateDto createDto = new RequestCreateDto(event.getId());
@@ -280,7 +280,7 @@ class RequestServiceTest {
         Map<Long, Event> eventMap = generateAndPersistEvent(1);
         Event event = eventMap.values().stream().findFirst().get();
         event.setState(EventState.PUBLISHED);
-        event.setParticipantLimit(1);
+        event.setParticipantLimit(1l);
         User firstRequester = generateAndPersistUser();
         User secondRequester = generateAndPersistUser();
 

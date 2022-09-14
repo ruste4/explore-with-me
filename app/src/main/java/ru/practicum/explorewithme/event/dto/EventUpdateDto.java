@@ -23,7 +23,7 @@ public class EventUpdateDto {
 
     private Boolean paid;
 
-    private Integer participantLimit;
+    private Long participantLimit;
 
     private String title;
 

@@ -2,11 +2,13 @@ package ru.practicum.explorewithme.event;
 
 import lombok.*;
 import ru.practicum.explorewithme.event.category.Category;
+import ru.practicum.explorewithme.request.Request;
 import ru.practicum.explorewithme.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "events")
@@ -25,8 +27,9 @@ public class Event {
     @Column(name = "annotation")
     private String annotation;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
+    @ToString.Exclude
     private Category category;
 
     @Column(name = "created_on")
@@ -38,15 +41,16 @@ public class Event {
     @Column(name = "event_date")
     private LocalDateTime eventDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "initiator_id")
+    @ToString.Exclude
     private User initiator;
 
     @Column(name = "paid")
     private boolean paid;
 
     @Column(name = "participant_limit")
-    private int participantLimit;
+    private Long participantLimit;
 
     @Column(name = "published_on")
     private LocalDateTime publishedOn;

@@ -9,8 +9,23 @@ import java.time.LocalDateTime;
 
 @StaticMetamodel(Event.class)
 public class Event_ {
+
+    public static volatile SingularAttribute<Event, Long> id;
+
     public static volatile SingularAttribute<Event, User> initiator;
+
     public static volatile SingularAttribute<Event, EventState> state;
+
     public static volatile SingularAttribute<Event, Category> category;
+
     public static volatile SingularAttribute<Event, LocalDateTime> eventDate;
+
+    public static volatile SingularAttribute<Event, String> annotation;
+
+    public static volatile SingularAttribute<Event, String> description;
+
+    public static volatile SingularAttribute<Event, Boolean> paid;
+
+    public static volatile SingularAttribute<Event, Long> participantLimit;
+
 }

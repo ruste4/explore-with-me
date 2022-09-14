@@ -29,7 +29,7 @@ public class EventCreateDto {
     private Boolean paid;
 
     @NotNull
-    private Integer participantLimit;
+    private Long participantLimit;
 
     @NotNull
     private Boolean requestModeration;

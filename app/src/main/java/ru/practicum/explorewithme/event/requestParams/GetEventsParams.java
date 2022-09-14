@@ -1,11 +1,13 @@
 package ru.practicum.explorewithme.event.requestParams;
 
+import lombok.Builder;
 import lombok.Data;
 import ru.practicum.explorewithme.event.EventSort;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class GetEventsParams {
     /**
      *  Текст для поиска в содержимом аннотации и подробном описании события
@@ -15,7 +17,7 @@ public class GetEventsParams {
     /**
      * Список идентификаторов категорий в которых будет вестись поиск
      */
-    private long[] categoryIds;
+    private Long[] categoryIds;
 
     /**
      * Поиск только платных/бесплатных событий. Если null - не использовать данный фильтр
@@ -25,12 +27,14 @@ public class GetEventsParams {
     /**
      * Дата и время не раньше которых должно произойти событие
      */
-    private LocalDateTime rangeStart;
+    @Builder.Default
+    private LocalDateTime rangeStart = LocalDateTime.now();
 
     /**
      * Дата и время не позже которых должно произойти событие
      */
-    private LocalDateTime rangeEnd;
+    @Builder.Default
+    private LocalDateTime rangeEnd = LocalDateTime.MAX;
 
     /**
      * Только события у которых не исчерпан лимит запросов на участие

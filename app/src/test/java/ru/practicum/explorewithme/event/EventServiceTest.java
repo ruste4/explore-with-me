@@ -17,13 +17,16 @@ import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 import ru.practicum.explorewithme.event.exception.EventDateInvalidException;
 import ru.practicum.explorewithme.event.exception.EventUpdatingIsProhibitedException;
 import ru.practicum.explorewithme.event.exception.UserInActivatedException;
+import ru.practicum.explorewithme.event.requestParams.GetEventsParams;
 import ru.practicum.explorewithme.event.requestParams.SearchEventParams;
 import ru.practicum.explorewithme.user.User;
 
 import javax.transaction.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
@@ -65,7 +68,7 @@ class EventServiceTest {
                 .eventDate(LocalDateTime.now().plusDays(1))
                 .location(location)
                 .paid(false)
-                .participantLimit(10)
+                .participantLimit(10l)
                 .requestModeration(true)
                 .title("title " + nanoTime)
                 .build();
@@ -80,7 +83,7 @@ class EventServiceTest {
                 .description("description " + nanoTime)
                 .eventDate(LocalDateTime.now().plusDays(1))
                 .paid(false)
-                .participantLimit(10)
+                .participantLimit(10l)
                 .requestModeration(true)
                 .title("title " + nanoTime)
                 .createdOn(LocalDateTime.now().plusDays(1))
@@ -278,7 +281,7 @@ class EventServiceTest {
         Long eventId3 = testEntityManager.persistAndGetId(event3, Long.class);
 
         long[] userIds = {userId1};
-        long[] categoryIds = {event2.getCategory().getId(), event1.getCategory().getId()};
+        Long[] categoryIds = {event2.getCategory().getId(), event1.getCategory().getId()};
         String[] states = {"PENDING"};
 
         SearchEventParams params = new SearchEventParams();
@@ -298,8 +301,76 @@ class EventServiceTest {
                     assertEquals(eventService.searchEvents(params).size(), 3);
                 }
         );
-        ;
+    }
 
+//    @Test
+//    public void getEventsSuccess() {
+//        Map<Long, Event> eventMap = generateAndPersistEvent(3);
+//        eventMap.get(1L).setParticipantLimit(0L);
+//        eventMap.get(2L).setPaid(true);
+//
+//        String searchText = "anno";
+//        Long[] searchCategory = eventMap.values().stream().map(
+//                event -> event.getCategory().getId()
+//        ).toArray(Long[]::new);
+//
+//        GetEventsParams params = GetEventsParams.builder()
+//                .text(searchText)
+//                .categoryIds(searchCategory)
+//                .paid(false)
+//                .rangeStart(LocalDateTime.now().minusWeeks(1))
+//                .rangeEnd(LocalDateTime.now().plusWeeks(1))
+//                .onlyAvailable(true)
+////                .sort(EventSort.EVENT_DATE)
+////                .from(0)
+////                .size(10)
+//                .build();
+//
+//        List<EventShortDto> found = eventService.getEvents(params);
+//
+//        System.out.println(1);
+//    }
+
+    private Map<Long, Event> generateAndPersistEvent(int quantity) {
+        Map<Long, Event> res = new HashMap<>();
+
+        for (int i = 0; i < quantity; i++) {
+            long nanoTime = System.nanoTime();
+
+            Event event = Event.builder()
+                    .annotation("annotation " + nanoTime)
+                    .category(generateAndPersistEventCategory(String.valueOf(nanoTime)))
+                    .description("description " + nanoTime)
+                    .eventDate(LocalDateTime.now().plusDays(1))
+                    .paid(false)
+                    .initiator(generateAndPersistUser())
+                    .participantLimit(10l)
+                    .requestModeration(true)
+                    .title("title " + nanoTime)
+                    .createdOn(LocalDateTime.now().plusDays(1))
+                    .state(EventState.PENDING)
+                    .build();
+
+            testEntityManager.persistAndFlush(event);
+            res.put(event.getId(), event);
+        }
+
+        return res;
+    }
+
+    ;
+
+    private Category generateAndPersistEventCategory(String name) {
+        Category category = new Category(null, name);
+        return testEntityManager.persistAndFlush(category);
+    }
+
+    private User generateAndPersistUser() {
+        User result = new User();
+        result.setName("UserName");
+        result.setEmail(String.format("%s%s@mail.ru", result.getName(), userIdHolder.getAndIncrement()));
+        result.setActivated(true);
+        return testEntityManager.persistAndFlush(result);
     }
 
 }

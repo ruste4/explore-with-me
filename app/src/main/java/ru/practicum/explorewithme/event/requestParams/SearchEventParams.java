@@ -19,7 +19,7 @@ public class SearchEventParams {
     /**
      * Список id категорий в которых будет вестись поиск
      */
-    private long[] categories;
+    private Long[] categories;
 
     /**
      * Дата и время не раньше которых должно произойти событие
