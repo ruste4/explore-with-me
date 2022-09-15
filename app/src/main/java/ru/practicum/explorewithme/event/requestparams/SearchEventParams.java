@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.event.requestParams;
+package ru.practicum.explorewithme.event.requestparams;
 
 import lombok.Data;
 

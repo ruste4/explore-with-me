@@ -4,8 +4,8 @@ import ru.practicum.explorewithme.event.dto.EventCreateDto;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.EventUpdateDto;
-import ru.practicum.explorewithme.event.requestParams.GetEventsParams;
-import ru.practicum.explorewithme.event.requestParams.SearchEventParams;
+import ru.practicum.explorewithme.event.requestparams.GetEventsParams;
+import ru.practicum.explorewithme.event.requestparams.SearchEventParams;
 
 import java.util.List;
 

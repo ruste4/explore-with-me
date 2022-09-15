@@ -13,5 +13,4 @@ public class Request_ {
 
     public static volatile SingularAttribute<Request, Event> event;
 
-    public static final String EVENT = "event";
 }

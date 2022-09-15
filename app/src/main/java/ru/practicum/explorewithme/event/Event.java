@@ -2,13 +2,11 @@ package ru.practicum.explorewithme.event;
 
 import lombok.*;
 import ru.practicum.explorewithme.event.category.Category;
-import ru.practicum.explorewithme.request.Request;
 import ru.practicum.explorewithme.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Table(name = "events")
