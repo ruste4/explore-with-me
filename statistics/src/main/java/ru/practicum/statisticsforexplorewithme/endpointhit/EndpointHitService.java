@@ -1,6 +1,7 @@
 package ru.practicum.statisticsforexplorewithme.endpointhit;
 
 import ru.practicum.statisticsforexplorewithme.endpointhit.dto.EndpointHitCreateDto;
+import ru.practicum.statisticsforexplorewithme.endpointhit.dto.EndpointHitDto;
 import ru.practicum.statisticsforexplorewithme.endpointhit.dto.ViewStats;
 import ru.practicum.statisticsforexplorewithme.endpointhit.requestparams.GetStatsParams;
 
@@ -11,7 +12,7 @@ public interface EndpointHitService {
     /**
      * Сохранить информацию посещения
      */
-    void saveHit(EndpointHitCreateDto createDto);
+    EndpointHitDto saveHit(EndpointHitCreateDto createDto);
 
 
     /**

@@ -8,18 +8,22 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.statisticsforexplorewithme.endpointhit.dto.EndpointHitCreateDto;
+import ru.practicum.statisticsforexplorewithme.endpointhit.dto.EndpointHitDto;
 import ru.practicum.statisticsforexplorewithme.endpointhit.dto.ViewStats;
 import ru.practicum.statisticsforexplorewithme.endpointhit.requestparams.GetStatsParams;
 
 import javax.transaction.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -39,7 +43,23 @@ class EndpointHitServiceTest {
     }
 
     @Test
-    public void getStatsSuccess() {
+    public void saveHitSuccess() {
+        EndpointHitCreateDto createDto1 = generateEndpointHitCreateDto();
+
+        EndpointHitDto hit = ehService.saveHit(createDto1);
+
+        EndpointHit foundHit = testEntityManager.find(EndpointHit.class, hit.getId());
+
+        assertAll(
+                () -> assertEquals(hit.getApp(), foundHit.getApp()),
+                () -> assertEquals(hit.getIp(), foundHit.getIp()),
+                () -> assertEquals(hit.getUri(), foundHit.getUri())
+        );
+
+    }
+
+    @Test
+    public void getStatsSuccessWithUniqueTrue() {
         Map<Long, EndpointHit> hitMap = generateAndPersistEndpointHits(5);
         GetStatsParams params = GetStatsParams.builder()
                 .uris(hitMap.values().stream().map(EndpointHit::getUri).collect(Collectors.toList()))
@@ -55,8 +75,35 @@ class EndpointHitServiceTest {
 
         List<ViewStats> stats = ehService.getStats(params);
 
-//        stats.forEach(item -> System.out.println(item));
-        System.out.println(1);
+        assertAll(
+                () -> assertEquals(stats.get(0).getHits(), 1),
+                () -> assertEquals(stats.get(1).getHits(), 1)
+        );
+
+    }
+
+    @Test
+    public void getStatsSuccessWithUniqueFalse() {
+        Map<Long, EndpointHit> hitMap = generateAndPersistEndpointHits(5);
+        GetStatsParams params = GetStatsParams.builder()
+                .uris(hitMap.values().stream().map(EndpointHit::getUri).collect(Collectors.toList()))
+                .start(LocalDateTime.now().minusDays(1))
+                .end(LocalDateTime.now().plusDays(1))
+                .unique(false)
+                .build();
+
+        for (long i : hitMap.keySet()) {
+            EndpointHit eHit = hitMap.get(i);
+            System.out.printf("app=%s, uri=%s, ip=%s%n", eHit.getApp(), eHit.getUri(), eHit.getIp());
+        }
+
+        List<ViewStats> stats = ehService.getStats(params);
+
+        assertAll(
+                () -> assertEquals(stats.get(0).getHits(), 3),
+                () -> assertEquals(stats.get(1).getHits(), 2)
+        );
+
     }
 
     private Map<Long, EndpointHit> generateAndPersistEndpointHits(int quantity) {
@@ -74,17 +121,15 @@ class EndpointHitServiceTest {
             res.put(id, hit);
         }
 
-        EndpointHit hit = EndpointHit.builder()
-                .app("TestApp")
-                .uri("stats/22")
-                .ip("213.59.151.21")
-                .timestamp(LocalDateTime.now())
-                .build();
-
-        Long id = testEntityManager.persistAndGetId(hit, Long.class);
-        res.put(id, hit);
-
         return res;
+    }
+
+    private EndpointHitCreateDto generateEndpointHitCreateDto() {
+        return EndpointHitCreateDto.builder()
+                .app("TestApp")
+                .uri("stats/" + ThreadLocalRandom.current().nextInt(1, 100))
+                .ip("213.59.151." + ThreadLocalRandom.current().nextInt(10, 99))
+                .build();
     }
 
 }

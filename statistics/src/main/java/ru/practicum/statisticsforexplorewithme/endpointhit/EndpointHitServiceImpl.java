@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.statisticsforexplorewithme.endpointhit.dto.EndpointHitCreateDto;
+import ru.practicum.statisticsforexplorewithme.endpointhit.dto.EndpointHitDto;
 import ru.practicum.statisticsforexplorewithme.endpointhit.dto.ViewStats;
 import ru.practicum.statisticsforexplorewithme.endpointhit.requestparams.GetStatsParams;
 
@@ -19,12 +20,12 @@ public class EndpointHitServiceImpl implements EndpointHitService {
     private final EndpointHitRepository repository;
 
     @Override
-    public void saveHit(EndpointHitCreateDto createDto) {
+    public EndpointHitDto saveHit(EndpointHitCreateDto createDto) {
         EndpointHit endpointHit = EndpointHitMapper.toEndpointHit(createDto);
         LocalDateTime now = LocalDateTime.now();
         endpointHit.setTimestamp(now);
 
-        repository.save(endpointHit);
+        return EndpointHitMapper.toEndpointHitDto(repository.save(endpointHit));
     }
 
     @Override
