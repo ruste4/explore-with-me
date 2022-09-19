@@ -302,34 +302,6 @@ class EventServiceTest {
         );
     }
 
-//    @Test
-//    public void getEventsSuccess() {
-//        Map<Long, Event> eventMap = generateAndPersistEvent(3);
-//        eventMap.get(1L).setParticipantLimit(0L);
-//        eventMap.get(2L).setPaid(true);
-//
-//        String searchText = "anno";
-//        Long[] searchCategory = eventMap.values().stream().map(
-//                event -> event.getCategory().getId()
-//        ).toArray(Long[]::new);
-//
-//        GetEventsParams params = GetEventsParams.builder()
-//                .text(searchText)
-//                .categoryIds(searchCategory)
-//                .paid(false)
-//                .rangeStart(LocalDateTime.now().minusWeeks(1))
-//                .rangeEnd(LocalDateTime.now().plusWeeks(1))
-//                .onlyAvailable(true)
-////                .sort(EventSort.EVENT_DATE)
-////                .from(0)
-////                .size(10)
-//                .build();
-//
-//        List<EventShortDto> found = eventService.getEvents(params);
-//
-//        System.out.println(1);
-//    }
-
     private Map<Long, Event> generateAndPersistEvent(int quantity) {
         Map<Long, Event> res = new HashMap<>();
 
@@ -356,8 +328,6 @@ class EventServiceTest {
 
         return res;
     }
-
-    ;
 
     private Category generateAndPersistEventCategory(String name) {
         Category category = new Category(null, name);
