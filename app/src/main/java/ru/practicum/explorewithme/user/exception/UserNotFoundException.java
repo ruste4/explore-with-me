@@ -1,7 +1,10 @@
 package ru.practicum.explorewithme.user.exception;
 
-public class UserNotFoundException extends RuntimeException {
-    public UserNotFoundException(String message) {
-        super(message);
+import ru.practicum.explorewithme.exception.NotFoundException;
+
+public class UserNotFoundException extends NotFoundException {
+    public UserNotFoundException(String reason) {
+        super("User not found", reason);
     }
+
 }

@@ -19,7 +19,7 @@ public class UserController {
 
     @GetMapping
     public List<UserDto> search(
-            @RequestParam("id") long[] userIds,
+            @RequestParam("ids") long[] userIds,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {

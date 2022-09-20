@@ -95,7 +95,9 @@ public class RequestServiceImpl implements RequestService {
 
     private User findUserById(long id) {
         return userRepository.findById(id).orElseThrow(
-                () -> new UserNotFoundException(String.format("User with id:%s not found", id))
+                () -> new UserNotFoundException(
+                        String.format("User with id:%s not found", id)
+                )
         );
     }
 

@@ -20,4 +20,6 @@ public interface EndpointHitService {
      */
     List<ViewStats> getStats(GetStatsParams params);
 
+    int getViewCount(GetStatsParams params);
+
 }

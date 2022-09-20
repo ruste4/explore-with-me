@@ -40,4 +40,9 @@ public class EndpointHitServiceImpl implements EndpointHitService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public int getViewCount(GetStatsParams params) {
+        return getStats(params).size();
+    }
 }

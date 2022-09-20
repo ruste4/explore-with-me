@@ -1,6 +1,7 @@
 package ru.practicum.explorewithme.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,8 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+@Slf4j
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
@@ -26,10 +28,13 @@ public class UserServiceImpl implements UserService{
 
         return result.map(UserMapper::toUserDto).toList();
     }
+
     @Override
     public UserFullDto findUserById(long userId) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException(String.format("User with id:%s not found", userId))
+                () -> new UserNotFoundException(
+                        String.format("User with id:%s not found", userId)
+                )
         );
 
         return UserMapper.toUserFullDto(user);
@@ -37,8 +42,10 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserDto add(UserCreateDto userCreateDto) {
+        log.info("Add User with email: {}, name: {}", userCreateDto.getEmail(), userCreateDto.getName());
         User user = UserMapper.toUser(userCreateDto);
         userRepository.save(user);
+        log.info("User with email: {} added, assigned id:{}", userCreateDto.getEmail(), user.getId());
         return UserMapper.toUserDto(user);
     }
 
