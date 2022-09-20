@@ -10,13 +10,14 @@ import ru.practicum.explorewithme.user.User_;
 
 import javax.persistence.criteria.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class EventSpecs {
-    public static Specification<Event> hasInitiationIds(long[] userIds) {
+    public static Specification<Event> hasInitiationIds(List<Long> userIds) {
         return (root, query, builder) -> {
             Join<Event, User> users = root.join(Event_.initiator, JoinType.LEFT);
             CriteriaBuilder.In<Long> inClause = builder.in(users.get(User_.id));
-            if (userIds != null && userIds.length != 0) {
+            if (userIds != null && userIds.size() != 0) {
                 for (long userId : userIds) {
                     inClause.value(userId);
                 }
@@ -26,10 +27,10 @@ public class EventSpecs {
         };
     }
 
-    public static Specification<Event> hasEventStates(String[] states) {
+    public static Specification<Event> hasEventStates(List<String> states) {
         return (root, query, builder) -> {
             CriteriaBuilder.In<EventState> inClause = builder.in(root.get(Event_.state));
-            if (states != null && states.length != 0) {
+            if (states != null && states.size() != 0) {
                 for (String state : states) {
                     inClause.value(EventState.findByName(state));
                 }
@@ -39,11 +40,11 @@ public class EventSpecs {
         };
     }
 
-    public static Specification<Event> hasEventCategory(Long[] categories) {
+    public static Specification<Event> hasEventCategory(List<Long> categories) {
         return (root, query, builder) -> {
             Join<Event, Category> categoryJoin = root.join(Event_.category, JoinType.LEFT);
             CriteriaBuilder.In<Long> inClause = builder.in(categoryJoin.get(Category_.id));
-            if (categories != null && categories.length != 0) {
+            if (categories != null && categories.size() != 0) {
                 for (long categoryId : categories) {
                     inClause.value(categoryId);
                 }

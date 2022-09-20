@@ -14,7 +14,6 @@ import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 import ru.practicum.explorewithme.event.exception.*;
 import ru.practicum.explorewithme.event.requestparams.GetEventsParams;
-import ru.practicum.explorewithme.event.requestparams.SearchEventParams;
 import ru.practicum.explorewithme.request.RequestRepository;
 import ru.practicum.explorewithme.request.RequestStatus;
 import ru.practicum.explorewithme.user.User;
@@ -51,7 +50,7 @@ public class EventServiceImpl implements EventService {
             case EVENT_DATE:
                 Specification<Event> spec = EventSpecs
                         .hasTextInAnnotationOrDescription(params.getText())
-                        .and(EventSpecs.hasEventCategory(params.getCategoryIds()))
+                        .and(EventSpecs.hasEventCategory(List.of(params.getCategoryIds())))
                         .and(EventSpecs.isPaid(params.getPaid()))
                         .and(EventSpecs.betweenDates(params.getRangeStart(), params.getRangeEnd()))
                         .and(EventSpecs.isEventAvailable(params.isOnlyAvailable()));
@@ -61,12 +60,12 @@ public class EventServiceImpl implements EventService {
                 List<Long> eventIds = new ArrayList<>(); // todo собираем id для отправки на сервер статистики
 
                 List<EventShortDto> res = eventRepository.findAll(spec, pg).map(e -> {
-                            int confirmedRequestCount = getConfirmedRequestsCountForEvent(e);
-                            EventShortDto shortDto = EventMapper.toEventShortDto(e);
-                            shortDto.setConfirmedRequests(confirmedRequestCount);
-                            eventIds.add(e.getId());
-                            return shortDto;
-                        }).toList();
+                    int confirmedRequestCount = getConfirmedRequestsCountForEvent(e);
+                    EventShortDto shortDto = EventMapper.toEventShortDto(e);
+                    shortDto.setConfirmedRequests(confirmedRequestCount);
+                    eventIds.add(e.getId());
+                    return shortDto;
+                }).toList();
 
                 // todo отправляем запрос на view
 
@@ -80,7 +79,7 @@ public class EventServiceImpl implements EventService {
                 List<EventShortDto> events = eventRepository.findAll(
                         EventSpecs
                                 .hasTextInAnnotationOrDescription(params.getText())
-                                .and(EventSpecs.hasEventCategory(params.getCategoryIds()))
+                                .and(EventSpecs.hasEventCategory(List.of(params.getCategoryIds())))
                                 .and(EventSpecs.isPaid(params.getPaid()))
                                 .and(EventSpecs.betweenDates(params.getRangeStart(), params.getRangeEnd()))
                                 .and(EventSpecs.isEventAvailable(params.isOnlyAvailable()))
@@ -101,7 +100,7 @@ public class EventServiceImpl implements EventService {
                 return eventRepository.findAll(
                         EventSpecs
                                 .hasTextInAnnotationOrDescription(params.getText())
-                                .and(EventSpecs.hasEventCategory(params.getCategoryIds()))
+                                .and(EventSpecs.hasEventCategory(List.of(params.getCategoryIds())))
                                 .and(EventSpecs.isPaid(params.getPaid()))
                                 .and(EventSpecs.betweenDates(params.getRangeStart(), params.getRangeEnd()))
                                 .and(EventSpecs.isEventAvailable(params.isOnlyAvailable()))
@@ -296,12 +295,20 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> searchEvents(SearchEventParams params) {
-        PageRequest pageRequest = PageRequest.of(params.getFrom(), params.getSize());
+    public List<EventFullDto> searchEvents(
+            List<Long> users,
+            List<String> states,
+            List<Long> categories,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd,
+            Integer from,
+            Integer size
+    ) {
+        PageRequest pageRequest = PageRequest.of(from, size);
         return eventRepository.findAll(EventSpecs
-                        .hasInitiationIds(params.getUsers())
-                        .and(EventSpecs.hasEventStates(params.getStates()))
-                        .and(EventSpecs.hasEventCategory(params.getCategories())),
+                        .hasInitiationIds(users)
+                        .and(EventSpecs.hasEventStates(states))
+                        .and(EventSpecs.hasEventCategory(categories)),
                 pageRequest
         ).map(event -> {
             int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);

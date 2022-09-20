@@ -1,5 +1,6 @@
 package ru.practicum.explorewithme.event;
 
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.explorewithme.event.dto.EventCreateDto;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
@@ -7,6 +8,9 @@ import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 import ru.practicum.explorewithme.event.requestparams.GetEventsParams;
 import ru.practicum.explorewithme.event.requestparams.SearchEventParams;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventService {
@@ -27,7 +31,7 @@ public interface EventService {
     List<EventShortDto> getEventsByInitiatorId(long userId, int from, int size);
 
     /**
-     *  Изменение события добавленного текущим пользователем
+     * Изменение события добавленного текущим пользователем
      */
     EventFullDto updateEventByInitiatorId(long userId, EventUpdateDto eventUpdateDto);
 
@@ -69,5 +73,13 @@ public interface EventService {
     /**
      * Поиск событий
      */
-    List<EventFullDto> searchEvents(SearchEventParams params);
+    List<EventFullDto> searchEvents(
+            List<Long> users,
+            List<String> states,
+            List<Long> categories,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd,
+            Integer from,
+            Integer size
+    );
 }

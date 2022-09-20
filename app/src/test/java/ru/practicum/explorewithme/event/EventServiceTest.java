@@ -279,25 +279,26 @@ class EventServiceTest {
         event3.setCategory(event2.getCategory());
         Long eventId3 = testEntityManager.persistAndGetId(event3, Long.class);
 
-        long[] userIds = {userId1};
-        Long[] categoryIds = {event2.getCategory().getId(), event1.getCategory().getId()};
-        String[] states = {"PENDING"};
+        List<Long> userIds = new java.util.ArrayList<>(List.of(userId1));
+        List<Long> categoryIds = List.of(event2.getCategory().getId(), event1.getCategory().getId());
+        List<String> states = List.of("PENDING");
 
-        SearchEventParams params = new SearchEventParams();
-        params.setUsers(userIds);
-        params.setCategories(categoryIds);
-        params.setStates(states);
-        params.setRangeStart(LocalDateTime.now().minusMonths(1));
-        params.setRangeEnd(LocalDateTime.now().plusMonths(1));
-        params.setFrom(0);
-        params.setSize(10);
 
         assertAll(
-                () -> assertEquals(eventService.searchEvents(params).size(), 2),
+                () -> assertEquals(
+                        eventService.searchEvents(
+                                userIds, states, categoryIds,
+                                LocalDateTime.now().minusMonths(1), LocalDateTime.now().plusMonths(1),
+                                0, 20
+                        ).size(), 2),
+
                 () -> {
-                    long[] userIdsWithTwoUsers = {userId1, userId2};
-                    params.setUsers(userIdsWithTwoUsers);
-                    assertEquals(eventService.searchEvents(params).size(), 3);
+                    userIds.add(userId2);
+                    assertEquals(eventService.searchEvents(
+                            userIds, states, categoryIds,
+                            LocalDateTime.now().minusMonths(1), LocalDateTime.now().plusMonths(1),
+                            0, 20
+                    ).size(), 3);
                 }
         );
     }
