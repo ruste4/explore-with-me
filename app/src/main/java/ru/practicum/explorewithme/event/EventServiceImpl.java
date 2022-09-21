@@ -129,6 +129,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getEventsByInitiatorId(long userId, int from, int size) {
+        log.info("Get events for initiator with id:{}, from: {}, size:{}", userId, from, size);
+
         User initiator = findUserById(userId);
 
         PageRequest pageRequest = PageRequest.of(from, size);
@@ -260,6 +262,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventCurrentUserById(long userId, long eventId) {
+        log.info("Get event with id:{} for current user with id:{}", eventId, userId);
         Event event = findEventById(eventId);
 
         isInitiatorOrException(event, userId);
@@ -273,6 +276,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto cancelEventAddedCurrentUserById(long userId, long eventId) {
+        log.info("Cancel event with id:{} added current user with id:{}", eventId, userId);
+
         Event event = findEventById(eventId);
 
         isInitiatorOrException(event, userId);

@@ -42,4 +42,14 @@ public class EventControllerForUser {
     ) {
         return eventService.getEventsByInitiatorId(userId, from, size);
     }
+
+    @GetMapping("/{userId}/events/{eventId}")
+    public EventFullDto getFullInfoAboutEventById(@PathVariable long userId, @PathVariable long eventId) {
+        return eventService.getEventCurrentUserById(userId, eventId);
+    }
+
+    @PatchMapping("/{userId}/events/{eventId}")
+    public EventFullDto cancelEventAddedCurrentUserById(@PathVariable long userId, @PathVariable long eventId) {
+        return eventService.cancelEventAddedCurrentUserById(userId, eventId);
+    }
 }
