@@ -6,7 +6,7 @@ import ru.practicum.explorewithme.user.dto.UserFullDto;
 
 public class UserMapper {
     public static User toUser(UserCreateDto userCreateDto) {
-        return new User(null, userCreateDto.getEmail(), userCreateDto.getName(), false);
+        return new User(null, userCreateDto.getEmail(), userCreateDto.getName(), true);
     }
 
     public static UserDto toUserDto(User user) {

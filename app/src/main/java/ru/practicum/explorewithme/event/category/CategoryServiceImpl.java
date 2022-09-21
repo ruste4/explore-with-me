@@ -1,6 +1,7 @@
 package ru.practicum.explorewithme.event.category;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.explorewithme.event.category.dto.CategoryCreateDto;
 import ru.practicum.explorewithme.event.category.dto.CategoryDto;
@@ -11,14 +12,17 @@ import javax.transaction.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
 
     @Override
     public CategoryDto add(CategoryCreateDto createDto) {
+        log.info("Add category: {}",createDto.getName());
         Category category = CategoryMapper.toCategory(createDto);
         categoryRepository.save(category);
+        log.info("Category with name: {} added, assigned id:{}", category.getName(), category.getId());
 
         return CategoryMapper.toCategoryDto(category);
     }

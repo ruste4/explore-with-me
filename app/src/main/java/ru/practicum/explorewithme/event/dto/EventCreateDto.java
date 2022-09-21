@@ -1,6 +1,10 @@
 package ru.practicum.explorewithme.event.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
+import ru.practicum.explorewithme.jsonserializer.LocalDateTimeDeserializer;
+import ru.practicum.explorewithme.jsonserializer.LocalDateTimeSerializer;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -20,6 +24,8 @@ public class EventCreateDto {
     private String description;
 
     @NotNull
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime eventDate;
 
     @NotNull
