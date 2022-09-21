@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.explorewithme.event.Event;
 import ru.practicum.explorewithme.event.EventService;
 import ru.practicum.explorewithme.event.EventState;
+import ru.practicum.explorewithme.event.Location;
 import ru.practicum.explorewithme.event.category.Category;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.request.dto.RequestCreateDto;
@@ -73,6 +74,7 @@ class RequestServiceTest {
                     .paid(false)
                     .initiator(generateAndPersistUser())
                     .participantLimit(10l)
+                    .location(new Location(14.2, 18.4))
                     .requestModeration(true)
                     .title("title " + nanoTime)
                     .createdOn(LocalDateTime.now().plusDays(1))

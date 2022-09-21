@@ -7,9 +7,13 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.event.EventService;
 import ru.practicum.explorewithme.event.dto.EventCreateDto;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
+import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "users")
@@ -30,4 +34,12 @@ public class EventControllerForUser {
         return eventService.updateEventByInitiatorId(userId, updateDto);
     }
 
+    @GetMapping("/{userId}/events")
+    public List<EventShortDto> getAllEventByInitiator(
+            @PathVariable long userId,
+            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+            @Positive @RequestParam(defaultValue = "10") Integer size
+    ) {
+        return eventService.getEventsByInitiatorId(userId, from, size);
+    }
 }

@@ -14,6 +14,7 @@ import ru.practicum.explorewithme.compilation.dto.CompilationDto;
 import ru.practicum.explorewithme.compilation.exception.CompilationNotFoundException;
 import ru.practicum.explorewithme.event.Event;
 import ru.practicum.explorewithme.event.EventState;
+import ru.practicum.explorewithme.event.Location;
 import ru.practicum.explorewithme.event.category.Category;
 import ru.practicum.explorewithme.event.exception.EventAlreadyExistException;
 import ru.practicum.explorewithme.event.exception.EventNotFoundException;
@@ -196,6 +197,7 @@ class CompilationServiceTest {
                     .participantLimit(10l)
                     .requestModeration(true)
                     .title("title " + nanoTime)
+                    .location(new Location(17.4, 20.1))
                     .createdOn(LocalDateTime.now().plusDays(1))
                     .state(EventState.PENDING)
                     .build();

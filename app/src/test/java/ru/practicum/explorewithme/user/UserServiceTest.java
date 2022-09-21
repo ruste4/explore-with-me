@@ -69,8 +69,7 @@ class UserServiceTest {
         assertAll("Tests for user fields",
                 () -> assertNotNull(foundUser.getId(), "id not null"),
                 () -> assertEquals(userCreateDto.getName(), foundUser.getName(), "the names are identical"),
-                () -> assertEquals(userCreateDto.getEmail(), foundUser.getEmail(), "the emails are identical"),
-                () -> assertFalse(foundUser.isActivated())
+                () -> assertEquals(userCreateDto.getEmail(), foundUser.getEmail(), "the emails are identical")
         );
     }
 

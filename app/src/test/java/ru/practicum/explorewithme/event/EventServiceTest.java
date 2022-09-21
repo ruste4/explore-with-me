@@ -58,7 +58,7 @@ class EventServiceTest {
 
     private final Supplier<EventCreateDto> createDtoSupplier = () -> {
         long nanoTime = System.nanoTime();
-        EventCreateDto.Location location = new EventCreateDto.Location(12, 12);
+        EventCreateDto.Location location = new EventCreateDto.Location(12.1, 12.2);
 
         return EventCreateDto.builder()
                 .annotation("annotation " + nanoTime)
@@ -87,6 +87,7 @@ class EventServiceTest {
                 .title("title " + nanoTime)
                 .createdOn(LocalDateTime.now().plusDays(1))
                 .state(EventState.PENDING)
+                .location(new Location(12.5, 13.4))
                 .build();
     };
 
@@ -159,7 +160,7 @@ class EventServiceTest {
         String updatedDescription = "updatedDescription";
         String updatedTitle = "updatedTitle";
         EventUpdateDto eventUpdateDto = new EventUpdateDto();
-        eventUpdateDto.setId(event.getId());
+        eventUpdateDto.setEventId(event.getId());
         eventUpdateDto.setDescription(updatedDescription);
         eventUpdateDto.setTitle(updatedTitle);
         eventService.updateEventByInitiatorId(userId, eventUpdateDto);
@@ -180,7 +181,7 @@ class EventServiceTest {
         event.setState(EventState.PUBLISHED);
         testEntityManager.persistAndFlush(event);
         EventUpdateDto eventUpdateDto = new EventUpdateDto();
-        eventUpdateDto.setId(event.getId());
+        eventUpdateDto.setEventId(event.getId());
 
         assertThrows(
                 EventUpdatingIsProhibitedException.class,
@@ -196,7 +197,7 @@ class EventServiceTest {
         event.setInitiator(user);
         testEntityManager.persistAndFlush(event);
         EventUpdateDto eventUpdateDto = new EventUpdateDto();
-        eventUpdateDto.setId(event.getId());
+        eventUpdateDto.setEventId(event.getId());
         eventUpdateDto.setEventDate(LocalDateTime.now().plusHours(1));
 
         assertThrows(
