@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.event.EventService;
 import ru.practicum.explorewithme.event.dto.EventCreateDto;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
+import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 
 import javax.validation.Valid;
 
@@ -24,7 +25,9 @@ public class EventControllerForUser {
         return eventService.addEvent(userId, createDto);
     }
 
-//    @PatchMapping("/{userId}/events")
-//    public
+    @PatchMapping("/{userId}/events")
+    public EventFullDto updateEvent(@PathVariable long userId, @RequestBody @Valid EventUpdateDto updateDto) {
+        return eventService.updateEventByInitiatorId(userId, updateDto);
+    }
 
 }

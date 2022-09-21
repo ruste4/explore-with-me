@@ -13,7 +13,9 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class EventUpdateDto {
     @EqualsAndHashCode.Include
-    private long id;
+    private long eventId;
+
+    private String annotation;
 
     private Long category;
 

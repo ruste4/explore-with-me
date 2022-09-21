@@ -1,6 +1,7 @@
 package ru.practicum.explorewithme.event;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class EventServiceImpl implements EventService {
 
     private final UserRepository userRepository;
@@ -146,8 +148,12 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto updateEventByInitiatorId(long userId, EventUpdateDto eventUpdateDto) {
 
-        long eventId = eventUpdateDto.getId();
+        log.info(
+                "Update event with id:{} at user with id:{}. Update data: {}",
+                eventUpdateDto.getEventId(), userId, eventUpdateDto
+        );
 
+        long eventId = eventUpdateDto.getEventId();
         Event event = findEventById(eventId);
 
         isInitiatorOrException(event, userId);
@@ -179,6 +185,10 @@ public class EventServiceImpl implements EventService {
             event.setCategory(category);
         }
 
+        if (eventUpdateDto.getAnnotation() != null) {
+            event.setAnnotation(eventUpdateDto.getAnnotation());
+        }
+
         if (eventUpdateDto.getDescription() != null) {
             event.setDescription(eventUpdateDto.getDescription());
         }
@@ -207,11 +217,7 @@ public class EventServiceImpl implements EventService {
             event.setTitle(eventUpdateDto.getTitle());
         }
 
-        int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
-        EventFullDto fullDto = EventMapper.toEventFullDto(event);
-        fullDto.setConfirmedRequests(confirmedRequestCount);
-        //todo запиши view
-        return fullDto;
+        return EventMapper.toEventFullDto(event);
     }
 
     @Override
