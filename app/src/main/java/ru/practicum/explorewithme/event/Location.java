@@ -4,21 +4,20 @@ import lombok.*;
 
 import javax.persistence.*;
 
-@Entity
-@Table(name = "locations")
-@Getter
-@Setter
-@ToString
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Embeddable
+@AttributeOverrides({
+        @AttributeOverride(name = "lat", column = @Column(name = "location_lat")),
+        @AttributeOverride(name = "lon", column = @Column(name = "location_lon"))
+})
 public class Location {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
 
     @Column(name = "lat")
-    private int lat;
+    private Double lat;
 
     @Column(name = "lon")
-    private int lon;
+    private Double lon;
+
 }

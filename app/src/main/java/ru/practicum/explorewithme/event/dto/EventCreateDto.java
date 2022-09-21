@@ -47,9 +47,9 @@ public class EventCreateDto {
     @AllArgsConstructor
     public static class Location {
 
-        private int lat;
+        private Double lat;
 
-        private int lon;
+        private Double lon;
 
     }
 }

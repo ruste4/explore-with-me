@@ -231,6 +231,7 @@ public class EventServiceImpl implements EventService {
                     BAN_HOURS_BEFORE_EVENT));
         }
 
+
         Event event = EventMapper.toEvent(eventCreateDto);
 
         event.setCategory(categoryRepository.findById(eventCreateDto.getCategory()).orElseThrow(

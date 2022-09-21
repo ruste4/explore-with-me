@@ -6,6 +6,7 @@ import ru.practicum.explorewithme.event.dto.EventShortDto;
 
 public class EventMapper {
     public static Event toEvent(EventCreateDto createDto) {
+        Location location = new Location(createDto.getLocation().getLat(), createDto.getLocation().getLon());
         return Event.builder()
                 .annotation(createDto.getAnnotation())
                 .description(createDto.getDescription())
@@ -14,6 +15,7 @@ public class EventMapper {
                 .participantLimit(createDto.getParticipantLimit())
                 .requestModeration(createDto.getRequestModeration())
                 .title(createDto.getTitle())
+                .location(location)
                 .build();
     }
 
@@ -26,6 +28,11 @@ public class EventMapper {
         EventFullDto.User initiator = new EventFullDto.User(
                 event.getInitiator().getId(),
                 event.getInitiator().getName()
+        );
+
+        EventFullDto.Location location = new EventFullDto.Location(
+                event.getLocation().getLat(),
+                event.getLocation().getLon()
         );
 
 
@@ -43,6 +50,7 @@ public class EventMapper {
                 .requestModeration(event.isRequestModeration())
                 .state(event.getState())
                 .title(event.getTitle())
+                .location(location)
                 .build();
     }
 

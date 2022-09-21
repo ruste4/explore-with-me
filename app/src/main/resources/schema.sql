@@ -28,6 +28,8 @@ CREATE TABLE IF NOT EXISTS events (
     request_moderation BOOLEAN DEFAULT FALSE NOT NULL,
     in_state VARCHAR(100) NOT NULL,
     title VARCHAR(4000) NOT NULL,
+    location_lat NUMERIC NOT NULL,
+    location_lon NUMERIC NOT NULL,
     CONSTRAINT pk_event PRIMARY KEY (id),
     CONSTRAINT FK_EVENT_ON_CATEGORY FOREIGN KEY (category_id) REFERENCES categories (id),
     CONSTRAINT FK_EVENT_ON_USER FOREIGN KEY (initiator_id) REFERENCES users (id)

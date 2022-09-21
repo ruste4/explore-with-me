@@ -24,4 +24,7 @@ public class EventControllerForUser {
         return eventService.addEvent(userId, createDto);
     }
 
+//    @PatchMapping("/{userId}/events")
+//    public
+
 }

@@ -39,6 +39,18 @@ public class EventFullDto {
 
     private int views;
 
+    private Location location;
+
+    @Data
+    @AllArgsConstructor
+    public static class Location {
+
+        private double lat;
+
+        private double lon;
+
+    }
+
     @Data
     @AllArgsConstructor
     public static class Category {
