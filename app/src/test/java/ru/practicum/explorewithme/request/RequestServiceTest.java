@@ -15,7 +15,6 @@ import ru.practicum.explorewithme.event.EventState;
 import ru.practicum.explorewithme.event.Location;
 import ru.practicum.explorewithme.event.category.Category;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
-import ru.practicum.explorewithme.request.dto.RequestCreateDto;
 import ru.practicum.explorewithme.request.dto.RequestFullDto;
 import ru.practicum.explorewithme.request.exception.*;
 import ru.practicum.explorewithme.user.User;
@@ -139,8 +138,7 @@ class RequestServiceTest {
         event.setState(EventState.PUBLISHED);
         User requester = generateAndPersistUser();
 
-        RequestCreateDto createDto = new RequestCreateDto(event.getId());
-        RequestFullDto createdRequest = requestService.addEventRequest(requester.getId(), createDto);
+        RequestFullDto createdRequest = requestService.addEventRequest(requester.getId(), event.getId());
         Request foundRequest = testEntityManager.find(Request.class, createdRequest.getId());
 
         assertAll(
@@ -157,12 +155,11 @@ class RequestServiceTest {
         event.setParticipantLimit(1l);
         User firstRequester = generateAndPersistUser();
         User secondRequester = generateAndPersistUser();
-        RequestCreateDto createDto = new RequestCreateDto(event.getId());
 
-        requestService.addEventRequest(firstRequester.getId(), createDto);
+        requestService.addEventRequest(firstRequester.getId(), event.getId());
 
         assertThrows(ParticipantLimitExceededException.class,
-                () -> requestService.addEventRequest(secondRequester.getId(), createDto)
+                () -> requestService.addEventRequest(secondRequester.getId(), event.getId())
         );
     }
 
@@ -171,10 +168,9 @@ class RequestServiceTest {
         Map<Long, Event> eventMap = generateAndPersistEvent(1);
         Event event = eventMap.values().stream().findFirst().get();
         User requester = generateAndPersistUser();
-        RequestCreateDto createDto = new RequestCreateDto(event.getId());
 
         assertThrows(RequestUnpublishedEventException.class,
-                () -> requestService.addEventRequest(requester.getId(), createDto)
+                () -> requestService.addEventRequest(requester.getId(), event.getId())
         );
     }
 
@@ -183,10 +179,9 @@ class RequestServiceTest {
         Map<Long, Event> eventMap = generateAndPersistEvent(1);
         Event event = eventMap.values().stream().findFirst().get();
         event.setState(EventState.PUBLISHED);
-        RequestCreateDto createDto = new RequestCreateDto(event.getId());
 
         assertThrows(RequesterIsInitiatorEventException.class,
-                () -> requestService.addEventRequest(event.getInitiator().getId(), createDto)
+                () -> requestService.addEventRequest(event.getInitiator().getId(), event.getId())
         );
     }
 
@@ -196,11 +191,10 @@ class RequestServiceTest {
         Event event = eventMap.values().stream().findFirst().get();
         event.setState(EventState.PUBLISHED);
         User requester = generateAndPersistUser();
-        RequestCreateDto createDto = new RequestCreateDto(event.getId());
-        requestService.addEventRequest(requester.getId(), createDto);
+        requestService.addEventRequest(requester.getId(), event.getId());
 
         assertThrows(RequestAlreadyExistException.class,
-                () -> requestService.addEventRequest(requester.getId(), new RequestCreateDto(event.getId()))
+                () -> requestService.addEventRequest(requester.getId(), event.getId())
         );
     }
 
@@ -211,8 +205,7 @@ class RequestServiceTest {
         event.setState(EventState.PUBLISHED);
         event.setRequestModeration(false);
         User requester = generateAndPersistUser();
-        RequestCreateDto createDto = new RequestCreateDto(event.getId());
-        RequestFullDto addedRequest = requestService.addEventRequest(requester.getId(), createDto);
+        RequestFullDto addedRequest = requestService.addEventRequest(requester.getId(), event.getId());
 
         Request foundRequest = testEntityManager.find(Request.class, addedRequest.getId());
 
@@ -226,8 +219,7 @@ class RequestServiceTest {
         event.setState(EventState.PUBLISHED);
         event.setRequestModeration(true);
         User requester = generateAndPersistUser();
-        RequestCreateDto createDto = new RequestCreateDto(event.getId());
-        RequestFullDto addedRequest = requestService.addEventRequest(requester.getId(), createDto);
+        RequestFullDto addedRequest = requestService.addEventRequest(requester.getId(), event.getId());
 
         Request foundRequest = testEntityManager.find(Request.class, addedRequest.getId());
 

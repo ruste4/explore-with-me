@@ -15,8 +15,13 @@ import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 import ru.practicum.explorewithme.event.exception.*;
 import ru.practicum.explorewithme.event.requestparams.GetEventsParams;
+import ru.practicum.explorewithme.request.Request;
+import ru.practicum.explorewithme.request.RequestMapper;
 import ru.practicum.explorewithme.request.RequestRepository;
 import ru.practicum.explorewithme.request.RequestStatus;
+import ru.practicum.explorewithme.request.dto.RequestFullDto;
+import ru.practicum.explorewithme.request.exception.ParticipantLimitExceededException;
+import ru.practicum.explorewithme.request.exception.RequestNotFoundException;
 import ru.practicum.explorewithme.user.User;
 import ru.practicum.explorewithme.user.UserRepository;
 import ru.practicum.explorewithme.user.exception.UserNotFoundException;
@@ -292,18 +297,81 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public void getRequestsForEventCurrentUserById(long userId, long eventId) {
+    public List<RequestFullDto> getRequestsForEventCurrentUserById(long userId, long eventId) {
+        Event event = findEventById(eventId);
 
+        isInitiatorOrException(event, userId);
+
+        List<Request> requests = requestRepository.findAllByEvent(event);
+
+        return requests.stream().map(RequestMapper::toRequestFullDto).collect(Collectors.toList());
     }
 
     @Override
-    public void confirmRequestOnEventCurrentUser(long userId, long eventId, long reqId) {
+    public RequestFullDto confirmRequestOnEventCurrentUser(long userId, long eventId, long reqId) {
+        Event event = findEventById(eventId);
+        isInitiatorOrException(event, userId);
+        Request request = findRequestById(reqId);
 
+        if (event.getParticipantLimit() == 0 || !event.isRequestModeration()) {
+            request.setStatus(RequestStatus.CONFIRMED);
+            return RequestMapper.toRequestFullDto(request);
+        }
+
+        List<Request> requests = findRequestsByEvent(event);
+        int requestCount = requests.size();
+
+        if (event.getParticipantLimit() <= requestCount) {
+            throw new ParticipantLimitExceededException(String.format(
+                    "Exceeding limit of participants for event with id:%s. Request with id:%s cannot be confirmed",
+                    eventId, reqId
+            ));
+        }
+
+        if (event.getParticipantLimit() <= requestCount + 1) {
+            rejectAllPendingRequestByEvent(event);
+        }
+
+        request.setStatus(RequestStatus.CONFIRMED);
+
+        return RequestMapper.toRequestFullDto(request);
+    }
+
+    private void rejectAllPendingRequestByEvent(Event event) {
+        findRequestsByEvent(event)
+                .forEach((r) -> {
+                    if (r.getStatus().equals(RequestStatus.PENDING)) {
+                        r.setStatus(RequestStatus.REJECTED);
+                    }
+                });
     }
 
     @Override
-    public void rejectRequestOnEventCurrentUser(long userId, long eventId, long reqId) {
+    public RequestFullDto rejectRequestOnEventCurrentUser(long userId, long eventId, long reqId) {
+        Event event = findEventById(eventId);
+        isInitiatorOrException(event, userId);
+        Request request = findRequestById(reqId);
+        request.setStatus(RequestStatus.REJECTED);
 
+        return RequestMapper.toRequestFullDto(request);
+    }
+
+    @Override
+    public EventFullDto publishEvent(long eventId) {
+        log.info("Publish event with id:{}", eventId);
+        Event event = findEventById(eventId);
+        event.setState(EventState.PUBLISHED);
+
+        return EventMapper.toEventFullDto(event);
+    }
+
+    @Override
+    public EventFullDto rejectEvent(long eventId) {
+        log.info("Reject event with id:{}", eventId);
+        Event event = findEventById(eventId);
+        event.setState(EventState.CANCELED);
+
+        return EventMapper.toEventFullDto(event);
     }
 
     @Override
@@ -342,6 +410,16 @@ public class EventServiceImpl implements EventService {
                 () -> new UserNotFoundException(
                         String.format("User with id:%s not found", id)
                 )
+        );
+    }
+
+    private List<Request> findRequestsByEvent(Event event) {
+        return requestRepository.findAllByEvent(event);
+    }
+
+    private Request findRequestById(long reqId) {
+        return requestRepository.findById(reqId).orElseThrow(
+                () -> new RequestNotFoundException(String.format("Request with id:%s not found", reqId))
         );
     }
 

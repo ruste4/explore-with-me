@@ -2,6 +2,7 @@ package ru.practicum.explorewithme.event.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.repository.query.Param;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.event.EventService;
@@ -9,6 +10,8 @@ import ru.practicum.explorewithme.event.dto.EventCreateDto;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.EventUpdateDto;
+import ru.practicum.explorewithme.request.RequestService;
+import ru.practicum.explorewithme.request.dto.RequestFullDto;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -52,4 +55,31 @@ public class EventControllerForUser {
     public EventFullDto cancelEventAddedCurrentUserById(@PathVariable long userId, @PathVariable long eventId) {
         return eventService.cancelEventAddedCurrentUserById(userId, eventId);
     }
+
+    @GetMapping("/{userId}/events/{eventId}/requests")
+    public List<RequestFullDto> getRequestsToParticipateInEventCurrentUser(
+            @PathVariable long userId,
+            @PathVariable long eventId
+    ) {
+        return eventService.getRequestsForEventCurrentUserById(userId, eventId);
+    }
+
+    @PatchMapping("/{userId}/events/{eventId}/requests/{reqId}/confirm")
+    public RequestFullDto confirmRequestForEventCurrentUser(
+            @PathVariable long userId,
+            @PathVariable long eventId,
+            @PathVariable long reqId
+    ) {
+        return eventService.confirmRequestOnEventCurrentUser(userId, eventId, reqId);
+    }
+
+    @PatchMapping("/{userId}/events/{eventId}/requests/{reqId}/reject")
+    public RequestFullDto rejectRequestForEventCurrentUser(
+            @PathVariable long userId,
+            @PathVariable long eventId,
+            @PathVariable long reqId
+    ) {
+        return eventService.rejectRequestOnEventCurrentUser(userId, eventId, reqId);
+    }
+
 }

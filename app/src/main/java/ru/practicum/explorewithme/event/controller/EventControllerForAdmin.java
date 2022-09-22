@@ -37,4 +37,9 @@ public class EventControllerForAdmin {
     ) {
         return eventService.searchEvents(users, states, categories, rangeStart, rangeEnd, from, size);
     }
+
+    @PatchMapping("/{eventId}/publish")
+    public EventFullDto publishEvent(@PathVariable long eventId) {
+        return eventService.publishEvent(eventId);
+    }
 }

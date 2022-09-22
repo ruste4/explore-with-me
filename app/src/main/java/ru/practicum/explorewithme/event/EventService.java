@@ -1,15 +1,12 @@
 package ru.practicum.explorewithme.event;
 
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.explorewithme.event.dto.EventCreateDto;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 import ru.practicum.explorewithme.event.requestparams.GetEventsParams;
-import ru.practicum.explorewithme.event.requestparams.SearchEventParams;
+import ru.practicum.explorewithme.request.dto.RequestFullDto;
 
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -57,18 +54,34 @@ public interface EventService {
 
     /**
      * Получение информации о запросах на участие в событии текущего пользователя
+     *
+     * @return
      */
-    void getRequestsForEventCurrentUserById(long userId, long eventId); //todo когда доделаешь функционал с запросами на участие, доработай этот метод с возвращением списка запросов для данного события
+    List<RequestFullDto> getRequestsForEventCurrentUserById(long userId, long eventId);
 
     /**
      * Подтверждение чужой заявки на участие в событии текущего пользователя
      */
-    void confirmRequestOnEventCurrentUser(long userId, long eventId, long reqId); //todo когда доделаешь функционал с запросами на участие, доработай этот метод с возвращением события для данного события
+    RequestFullDto confirmRequestOnEventCurrentUser(long userId, long eventId, long reqId);
 
     /**
      * Отклонение чужой заявки на участие в событии текущего пользователя
      */
-    void rejectRequestOnEventCurrentUser(long userId, long eventId, long reqId); //todo когда доделаешь функционал с запросами на участие, доработай этот метод с возвращением события для данного события
+    RequestFullDto rejectRequestOnEventCurrentUser(long userId, long eventId, long reqId);
+
+    /**
+     * Опубликовать событие
+     *
+     * @return
+     */
+    EventFullDto publishEvent(long eventId);
+
+    /**
+     * Отклонить событие
+     *
+     * @return
+     */
+    EventFullDto rejectEvent(long eventId);
 
     /**
      * Поиск событий

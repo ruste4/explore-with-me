@@ -1,12 +1,12 @@
 package ru.practicum.explorewithme.request;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.explorewithme.event.Event;
 import ru.practicum.explorewithme.event.EventRepository;
 import ru.practicum.explorewithme.event.EventState;
 import ru.practicum.explorewithme.event.exception.EventNotFoundException;
-import ru.practicum.explorewithme.request.dto.RequestCreateDto;
 import ru.practicum.explorewithme.request.dto.RequestFullDto;
 import ru.practicum.explorewithme.request.exception.*;
 import ru.practicum.explorewithme.user.User;
@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
@@ -30,14 +31,14 @@ public class RequestServiceImpl implements RequestService {
     private final UserRepository userRepository;
 
     @Override
-    public RequestFullDto addEventRequest(long userId, RequestCreateDto createDto) {
-        Event event = findEventById(createDto.getEvent());
+    public RequestFullDto addEventRequest(long userId, long eventId) {
+        Event event = findEventById(eventId);
         User user = findUserById(userId);
 
         checkRequestLimit(event);
         checkEventStateIsPublished(event);
         checkUserNotEventInitiator(user, event);
-        checkEventRequestNotAlreadyExist(userId, createDto.getEvent());
+        checkEventRequestNotAlreadyExist(userId, eventId);
 
         Request newRequest = new Request();
         newRequest.setEvent(event);
@@ -55,6 +56,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestFullDto> getEventRequestsFromCurrentUser(long userId) {
+        log.info("Get request from current user with id:{}", userId);
 
         User requester = findUserById(userId);
 

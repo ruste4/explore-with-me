@@ -6,7 +6,11 @@ public enum RequestStatus {
 
     CONFIRMED("CONFIRMED"),
 
+    REJECTED("REJECTED"),
+
     CANCELED("CANCELED");
+
+
 
     private final String val;
 

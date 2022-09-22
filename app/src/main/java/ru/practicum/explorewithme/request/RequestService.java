@@ -10,7 +10,7 @@ public interface RequestService {
     /**
      * Добавление запросов от текущего пользователя на участие в событии
      */
-    RequestFullDto addEventRequest(long userId, RequestCreateDto createDto);
+    RequestFullDto addEventRequest(long userId, long eventId);
 
     /**
      * Получение информации о заявках текущего пользователя на участие в чужих событиях
