@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -35,8 +36,9 @@ public class EventControllerForAdmin {
             @Positive @RequestParam(defaultValue = "100") Integer size,
             HttpServletRequest request
     ) {
-        LocalDateTime start = LocalDateTime.parse(rangeStart);
-        LocalDateTime end = LocalDateTime.parse(rangeEnd);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime start = LocalDateTime.parse(rangeStart, formatter);
+        LocalDateTime end = LocalDateTime.parse(rangeEnd, formatter);
 
         return eventService.searchEvents(users, states, categories, start, end, from, size);
     }

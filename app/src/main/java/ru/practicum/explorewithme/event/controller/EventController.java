@@ -12,6 +12,7 @@ import ru.practicum.explorewithme.event.dto.EventShortDto;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -35,8 +36,9 @@ public class EventController {
             @PositiveOrZero @RequestParam(defaultValue = "0") int from,
             @Positive @RequestParam(defaultValue = "100") int size
     ) {
-        LocalDateTime start = LocalDateTime.parse(rangeStart);
-        LocalDateTime end = LocalDateTime.parse(rangeEnd);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime start = LocalDateTime.parse(rangeStart, formatter);
+        LocalDateTime end = LocalDateTime.parse(rangeEnd, formatter);
         EventSort eventSort = EventSort.valueOf(sort);
 
         return eventService.getEvents(text, categories, paid, start, end, onlyAvailable, eventSort, from, size);
