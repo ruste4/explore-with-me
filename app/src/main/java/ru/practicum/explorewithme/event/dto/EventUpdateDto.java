@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode
 public class EventUpdateDto {
-    @EqualsAndHashCode.Include
+
     private long eventId;
 
     private String annotation;
