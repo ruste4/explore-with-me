@@ -15,7 +15,17 @@ public interface EventService {
     /**
      * Получение событий с возможностью фильтрации
      */
-    List<EventShortDto> getEvents(GetEventsParams params);
+    List<EventShortDto> getEvents(
+            String text,
+            List<Long> categories,
+            Boolean paid,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd,
+            Boolean onlyAvailable,
+            EventSort sort,
+            int from,
+            int size
+    );
 
     /**
      * Получение подробной информации о событии по его идентификатору

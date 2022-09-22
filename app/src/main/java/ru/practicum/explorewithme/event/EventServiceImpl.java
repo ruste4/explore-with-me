@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.explorewithme.event.category.Category;
 import ru.practicum.explorewithme.event.category.CategoryRepository;
 import ru.practicum.explorewithme.event.category.exception.CategoryNotFoundException;
@@ -27,6 +28,8 @@ import ru.practicum.explorewithme.user.UserRepository;
 import ru.practicum.explorewithme.user.exception.UserNotFoundException;
 
 import javax.transaction.Transactional;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,17 +55,27 @@ public class EventServiceImpl implements EventService {
     private static final int BAN_HOURS_BEFORE_EVENT = 2;
 
     @Override
-    public List<EventShortDto> getEvents(GetEventsParams params) {
-        switch (params.getSort()) {
+    public List<EventShortDto> getEvents(
+            String text,
+            List<Long> categories,
+            Boolean paid,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd,
+            Boolean onlyAvailable,
+            EventSort sort,
+            int from,
+            int size
+    ) {
+        switch (sort) {
             case EVENT_DATE:
                 Specification<Event> spec = EventSpecs
-                        .hasTextInAnnotationOrDescription(params.getText())
-                        .and(EventSpecs.hasEventCategory(List.of(params.getCategoryIds())))
-                        .and(EventSpecs.isPaid(params.getPaid()))
-                        .and(EventSpecs.betweenDates(params.getRangeStart(), params.getRangeEnd()))
-                        .and(EventSpecs.isEventAvailable(params.isOnlyAvailable()));
+                        .hasTextInAnnotationOrDescription(text)
+                        .and(EventSpecs.hasEventCategory(categories))
+                        .and(EventSpecs.isPaid(paid))
+                        .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
+                        .and(EventSpecs.isEventAvailable(onlyAvailable));
 
-                PageRequest pg = PageRequest.of(params.getFrom(), params.getSize(), Sort.by("eventDate"));
+                PageRequest pg = PageRequest.of(from, size, Sort.by("eventDate"));
 
                 List<Long> eventIds = new ArrayList<>(); // todo собираем id для отправки на сервер статистики
 
@@ -85,11 +98,11 @@ public class EventServiceImpl implements EventService {
 
                 List<EventShortDto> events = eventRepository.findAll(
                         EventSpecs
-                                .hasTextInAnnotationOrDescription(params.getText())
-                                .and(EventSpecs.hasEventCategory(List.of(params.getCategoryIds())))
-                                .and(EventSpecs.isPaid(params.getPaid()))
-                                .and(EventSpecs.betweenDates(params.getRangeStart(), params.getRangeEnd()))
-                                .and(EventSpecs.isEventAvailable(params.isOnlyAvailable()))
+                                .hasTextInAnnotationOrDescription(text)
+                                .and(EventSpecs.hasEventCategory(categories))
+                                .and(EventSpecs.isPaid(paid))
+                                .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
+                                .and(EventSpecs.isEventAvailable(onlyAvailable))
                 ).stream().map(event -> {
                     int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
                     EventShortDto shortDto = EventMapper.toEventShortDto(event);
@@ -106,11 +119,11 @@ public class EventServiceImpl implements EventService {
             default:
                 return eventRepository.findAll(
                         EventSpecs
-                                .hasTextInAnnotationOrDescription(params.getText())
-                                .and(EventSpecs.hasEventCategory(List.of(params.getCategoryIds())))
-                                .and(EventSpecs.isPaid(params.getPaid()))
-                                .and(EventSpecs.betweenDates(params.getRangeStart(), params.getRangeEnd()))
-                                .and(EventSpecs.isEventAvailable(params.isOnlyAvailable()))
+                                .hasTextInAnnotationOrDescription(text)
+                                .and(EventSpecs.hasEventCategory(categories))
+                                .and(EventSpecs.isPaid(paid))
+                                .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
+                                .and(EventSpecs.isEventAvailable(onlyAvailable))
                 ).stream().map(event -> {
                     int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
                     EventShortDto shortDto = EventMapper.toEventShortDto(event);
