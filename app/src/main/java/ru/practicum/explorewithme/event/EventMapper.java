@@ -35,7 +35,6 @@ public class EventMapper {
                 event.getLocation().getLon()
         );
 
-
         return EventFullDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())

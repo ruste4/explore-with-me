@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.explorewithme.client.StatisticClient;
 import ru.practicum.explorewithme.event.EventService;
 import ru.practicum.explorewithme.event.EventSort;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
@@ -23,6 +25,7 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
+    private final StatisticClient statisticClient;
 
     @GetMapping
     public List<EventShortDto> getEventsWithFiltering(
@@ -34,18 +37,23 @@ public class EventController {
             @RequestParam(required = false) Boolean onlyAvailable,
             @RequestParam(required = false) String sort,
             @PositiveOrZero @RequestParam(defaultValue = "0") int from,
-            @Positive @RequestParam(defaultValue = "100") int size
+            @Positive @RequestParam(defaultValue = "100") int size,
+            HttpServletRequest request
     ) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime start = LocalDateTime.parse(rangeStart, formatter);
         LocalDateTime end = LocalDateTime.parse(rangeEnd, formatter);
         EventSort eventSort = EventSort.valueOf(sort);
 
+        statisticClient.sendHitAtStaticServer("ExploreWithMe", request.getRequestURI(), request.getRemoteAddr());
+
         return eventService.getEvents(text, categories, paid, start, end, onlyAvailable, eventSort, from, size);
     }
 
     @GetMapping("/{eventId}")
-    public EventFullDto getEvent(@PathVariable long eventId) {
+    public EventFullDto getEvent(@PathVariable long eventId, HttpServletRequest request) {
+        statisticClient.sendHitAtStaticServer("ExploreWithMe", request.getRequestURI(), request.getRemoteAddr());
+
         return eventService.getEventById(eventId);
     }
 }

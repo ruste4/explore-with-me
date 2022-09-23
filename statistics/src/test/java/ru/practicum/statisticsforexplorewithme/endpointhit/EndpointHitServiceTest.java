@@ -60,19 +60,18 @@ class EndpointHitServiceTest {
     @Test
     public void getStatsSuccessWithUniqueTrue() {
         Map<Long, EndpointHit> hitMap = generateAndPersistEndpointHits(5);
-        GetStatsParams params = GetStatsParams.builder()
-                .uris(hitMap.values().stream().map(EndpointHit::getUri).collect(Collectors.toList()))
-                .start(LocalDateTime.now().minusDays(1))
-                .end(LocalDateTime.now().plusDays(1))
-                .unique(true)
-                .build();
+
+        List<String> uris = hitMap.values().stream().map(EndpointHit::getUri).collect(Collectors.toList());
+        LocalDateTime start = LocalDateTime.now().minusDays(1);
+        LocalDateTime end = LocalDateTime.now().plusDays(1);
+
 
         for (long i : hitMap.keySet()) {
             EndpointHit eHit = hitMap.get(i);
             System.out.printf("app=%s, uri=%s, ip=%s%n", eHit.getApp(), eHit.getUri(), eHit.getIp());
         }
 
-        List<ViewStats> stats = ehService.getStats(params);
+        List<ViewStats> stats = ehService.getStats(start, end, uris, true);
 
         assertAll(
                 () -> assertEquals(stats.get(0).getHits(), 1),
@@ -84,19 +83,17 @@ class EndpointHitServiceTest {
     @Test
     public void getStatsSuccessWithUniqueFalse() {
         Map<Long, EndpointHit> hitMap = generateAndPersistEndpointHits(5);
-        GetStatsParams params = GetStatsParams.builder()
-                .uris(hitMap.values().stream().map(EndpointHit::getUri).collect(Collectors.toList()))
-                .start(LocalDateTime.now().minusDays(1))
-                .end(LocalDateTime.now().plusDays(1))
-                .unique(false)
-                .build();
 
         for (long i : hitMap.keySet()) {
             EndpointHit eHit = hitMap.get(i);
             System.out.printf("app=%s, uri=%s, ip=%s%n", eHit.getApp(), eHit.getUri(), eHit.getIp());
         }
 
-        List<ViewStats> stats = ehService.getStats(params);
+        List<String> uris = hitMap.values().stream().map(EndpointHit::getUri).collect(Collectors.toList());
+        LocalDateTime start = LocalDateTime.now().minusDays(1);
+        LocalDateTime end = LocalDateTime.now().plusDays(1);
+
+        List<ViewStats> stats = ehService.getStats(start, end, uris, false);
 
         assertAll(
                 () -> assertEquals(stats.get(0).getHits(), 3),

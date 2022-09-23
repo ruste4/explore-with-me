@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
+import ru.practicum.explorewithme.client.StatisticClient;
+import ru.practicum.explorewithme.client.dto.ViewStats;
 import ru.practicum.explorewithme.event.category.Category;
 import ru.practicum.explorewithme.event.category.CategoryRepository;
 import ru.practicum.explorewithme.event.category.exception.CategoryNotFoundException;
@@ -15,7 +15,6 @@ import ru.practicum.explorewithme.event.dto.EventFullDto;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 import ru.practicum.explorewithme.event.exception.*;
-import ru.practicum.explorewithme.event.requestparams.GetEventsParams;
 import ru.practicum.explorewithme.request.Request;
 import ru.practicum.explorewithme.request.RequestMapper;
 import ru.practicum.explorewithme.request.RequestRepository;
@@ -28,14 +27,10 @@ import ru.practicum.explorewithme.user.UserRepository;
 import ru.practicum.explorewithme.user.exception.UserNotFoundException;
 
 import javax.transaction.Transactional;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,6 +46,8 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
 
     private final RequestRepository requestRepository;
+
+    private final StatisticClient statisticClient;
 
     private static final int BAN_HOURS_BEFORE_EVENT = 2;
 
@@ -68,33 +65,8 @@ public class EventServiceImpl implements EventService {
     ) {
         switch (sort) {
             case EVENT_DATE:
-                Specification<Event> spec = EventSpecs
-                        .hasTextInAnnotationOrDescription(text)
-                        .and(EventSpecs.hasEventCategory(categories))
-                        .and(EventSpecs.isPaid(paid))
-                        .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
-                        .and(EventSpecs.isEventAvailable(onlyAvailable));
-
                 PageRequest pg = PageRequest.of(from, size, Sort.by("eventDate"));
-
-                List<Long> eventIds = new ArrayList<>(); // todo собираем id для отправки на сервер статистики
-
-                List<EventShortDto> res = eventRepository.findAll(spec, pg).map(e -> {
-                    int confirmedRequestCount = getConfirmedRequestsCountForEvent(e);
-                    EventShortDto shortDto = EventMapper.toEventShortDto(e);
-                    shortDto.setConfirmedRequests(confirmedRequestCount);
-                    eventIds.add(e.getId());
-                    return shortDto;
-                }).toList();
-
-                // todo отправляем запрос на view
-
-                res.forEach(e -> e.setViews(ThreadLocalRandom.current().nextInt(0, 10)));  // todo пока заполним рандомно
-
-                return res;
-
-            case VIEWS:
-                Map<Long, Integer> viewMap = new HashMap<>();
+                Map<String, ViewStats> viewStatsMap = new HashMap<>();
 
                 List<EventShortDto> events = eventRepository.findAll(
                         EventSpecs
@@ -102,19 +74,41 @@ public class EventServiceImpl implements EventService {
                                 .and(EventSpecs.hasEventCategory(categories))
                                 .and(EventSpecs.isPaid(paid))
                                 .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
-                                .and(EventSpecs.isEventAvailable(onlyAvailable))
-                ).stream().map(event -> {
-                    int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
-                    EventShortDto shortDto = EventMapper.toEventShortDto(event);
-                    shortDto.setConfirmedRequests(confirmedRequestCount);
-                    viewMap.put(event.getId(), 0);
-                    return shortDto;
-                }).collect(Collectors.toList());
+                                .and(EventSpecs.isEventAvailable(onlyAvailable)),
+                        pg
+                ).map(e -> {
+                    viewStatsMap.put("/events/" + e.getId(), null);
+                    EventShortDto res =  EventMapper.toEventShortDto(e);
+                    res.setConfirmedRequests(getConfirmedRequestsCountForEvent(e));
 
-                // TODO 1) Отправляем eventIds на сервер статистики вместе с даныыми для пагинации
-                //      2) На стороне сервера статиски делаем подборку просмотров Map(eventId, viewCount). айдишники нужно отсортирвать по количеству просмотров, и вернуть часть, согласно пагинации
-                //      3) После получения ответа от сервера статистики записать параметры view в event согласно их idи отсортировать по events.viewCount
+                    return res;
+                }).toList();
+
+                statisticClient.getStats(rangeStart, rangeEnd, viewStatsMap.keySet(), false)
+                        .forEach(vs -> viewStatsMap.put(vs.getUri(), vs));
+
+                events.forEach(e -> {
+                    String eventUrl = "/events/" + e.getId();
+                    ViewStats viewStats = viewStatsMap.get(eventUrl);
+
+                    if (viewStats != null) {
+                        e.setViews(viewStats.getHits());
+                    } else {
+                        e.setViews(0);
+                    }
+                });
+
                 return events;
+            case VIEWS:
+
+                return eventRepository.findAll(
+                        EventSpecs
+                                .hasTextInAnnotationOrDescription(text)
+                                .and(EventSpecs.hasEventCategory(categories))
+                                .and(EventSpecs.isPaid(paid))
+                                .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
+                                .and(EventSpecs.isEventAvailable(onlyAvailable))
+                ).stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
 
             default:
                 return eventRepository.findAll(
@@ -124,13 +118,7 @@ public class EventServiceImpl implements EventService {
                                 .and(EventSpecs.isPaid(paid))
                                 .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
                                 .and(EventSpecs.isEventAvailable(onlyAvailable))
-                ).stream().map(event -> {
-                    int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
-                    EventShortDto shortDto = EventMapper.toEventShortDto(event);
-                    shortDto.setConfirmedRequests(confirmedRequestCount);
-
-                    return shortDto;
-                }).collect(Collectors.toList());
+                ).stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
 
         }
 

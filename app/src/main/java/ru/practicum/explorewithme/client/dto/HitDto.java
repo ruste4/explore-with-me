@@ -17,6 +17,7 @@ public class HitDto {
 
     private String ip;
 
-    private LocalDateTime timeStamp;
+    @Builder.Default
+    private LocalDateTime timeStamp = LocalDateTime.now();
 
 }

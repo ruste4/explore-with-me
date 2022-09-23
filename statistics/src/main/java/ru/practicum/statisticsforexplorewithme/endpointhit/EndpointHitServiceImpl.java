@@ -29,7 +29,14 @@ public class EndpointHitServiceImpl implements EndpointHitService {
     }
 
     @Override
-    public List<ViewStats> getStats(GetStatsParams params) {
+    public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+
+        GetStatsParams params = GetStatsParams.builder()
+                .start(start)
+                .end(end)
+                .uris(uris)
+                .unique(unique)
+                .build();
 
         return repository.getStats(params).stream()
                 .map(item -> ViewStats
@@ -41,8 +48,4 @@ public class EndpointHitServiceImpl implements EndpointHitService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public int getViewCount(GetStatsParams params) {
-        return getStats(params).size();
-    }
 }
