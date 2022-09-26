@@ -4,11 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import ru.practicum.explorewithme.client.StatisticClient;
+import ru.practicum.explorewithme.client.dto.ViewStats;
 import ru.practicum.explorewithme.event.category.Category;
 import ru.practicum.explorewithme.event.dto.EventCreateDto;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
@@ -37,6 +41,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class EventServiceTest {
+
+    @MockBean
+    private StatisticClient statisticClient;
 
     @Autowired
     private final EventService eventService;
@@ -101,6 +108,10 @@ class EventServiceTest {
 
     @Test
     public void addEventSuccess() {
+        Mockito
+                .when(statisticClient.getStats(Mockito.any(), Mockito.any(), Mockito.anySet(), Mockito.anyBoolean()))
+                .thenReturn(List.of(new ViewStats("test", "events/test", 3)));
+
         User user = userSupplier.get();
         Long userId = testEntityManager.persistAndGetId(user, Long.class);
         EventCreateDto eventCreateDto = createDtoSupplier.get();
@@ -152,6 +163,10 @@ class EventServiceTest {
 
     @Test
     public void updateEventByInitiatorIdSuccess() {
+        Mockito
+                .when(statisticClient.getStats(Mockito.any(), Mockito.any(), Mockito.anySet(), Mockito.anyBoolean()))
+                .thenReturn(List.of(new ViewStats("test", "events/test", 3)));
+
         User user = userSupplier.get();
         Long userId = testEntityManager.persistAndGetId(user, Long.class);
         Event event = eventSupplier.get();
@@ -208,6 +223,10 @@ class EventServiceTest {
 
     @Test
     public void getEventsByInitiatorIdSuccess() {
+        Mockito
+                .when(statisticClient.getStats(Mockito.any(), Mockito.any(), Mockito.anySet(), Mockito.anyBoolean()))
+                .thenReturn(List.of(new ViewStats("test", "events/test", 3)));
+
         User user1 = userSupplier.get();
         Long userId1 = testEntityManager.persistAndGetId(user1, Long.class);
         User user2 = userSupplier.get();
@@ -234,6 +253,10 @@ class EventServiceTest {
 
     @Test
     public void getEventCurrentUserByIdSuccess() {
+        Mockito
+                .when(statisticClient.getStats(Mockito.any(), Mockito.any(), Mockito.anySet(), Mockito.anyBoolean()))
+                .thenReturn(List.of(new ViewStats("test", "events/test", 3)));
+
         User user = userSupplier.get();
         Long userId = testEntityManager.persistAndGetId(user, Long.class);
         Event event = eventSupplier.get();
@@ -247,6 +270,10 @@ class EventServiceTest {
 
     @Test
     public void cancelEventAddedCurrentUserByIdSuccess() {
+        Mockito
+                .when(statisticClient.getStats(Mockito.any(), Mockito.any(), Mockito.anySet(), Mockito.anyBoolean()))
+                .thenReturn(List.of(new ViewStats("test", "events/test", 3)));
+
         User user = userSupplier.get();
         Long userId = testEntityManager.persistAndGetId(user, Long.class);
         Event event = eventSupplier.get();
@@ -260,6 +287,10 @@ class EventServiceTest {
 
     @Test
     public void searchEventsSuccess() {
+        Mockito
+                .when(statisticClient.getStats(Mockito.any(), Mockito.any(), Mockito.anySet(), Mockito.anyBoolean()))
+                .thenReturn(List.of(new ViewStats("test", "events/test", 3)));
+
         // Добавить первое событие первого пользователя
         User user1 = userSupplier.get();
         Long userId1 = testEntityManager.persistAndGetId(user1, Long.class);

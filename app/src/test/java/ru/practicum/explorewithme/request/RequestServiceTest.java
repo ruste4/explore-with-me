@@ -4,11 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import ru.practicum.explorewithme.client.StatisticClient;
+import ru.practicum.explorewithme.client.dto.ViewStats;
 import ru.practicum.explorewithme.event.Event;
 import ru.practicum.explorewithme.event.EventService;
 import ru.practicum.explorewithme.event.EventState;
@@ -36,6 +40,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class RequestServiceTest {
+
+    @MockBean
+    private StatisticClient statisticClient;
 
     @Autowired
     private final RequestService requestService;
@@ -277,6 +284,10 @@ class RequestServiceTest {
         event.setParticipantLimit(1l);
         User firstRequester = generateAndPersistUser();
         User secondRequester = generateAndPersistUser();
+
+        Mockito
+                .when(statisticClient.getStats(Mockito.any(), Mockito.any(), Mockito.anySet(), Mockito.anyBoolean()))
+                .thenReturn(List.of(new ViewStats("test", "events/test", 3)));
 
         Request firstRequest = Request.builder()
                 .event(event)
