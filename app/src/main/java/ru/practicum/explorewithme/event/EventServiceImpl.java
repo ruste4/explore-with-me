@@ -28,10 +28,7 @@ import ru.practicum.explorewithme.user.exception.UserNotFoundException;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,22 +66,35 @@ public class EventServiceImpl implements EventService {
                 return getEventsSortByEventDate(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, from, size);
             case VIEWS:
                 return getEventsSortByViews(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, from, size);
-
             default:
-                PageRequest pg = PageRequest.of(from, size);
-
-                return eventRepository.findAll(
-                        EventSpecs
-                                .hasTextInAnnotationOrDescription(text)
-                                .and(EventSpecs.hasEventCategory(categories))
-                                .and(EventSpecs.isPaid(paid))
-                                .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
-                                .and(EventSpecs.isEventAvailable(onlyAvailable)),
-                        pg
-                ).stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
-
+                return getEventsWithoutSort(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, from, size);
         }
 
+    }
+
+    private List<EventShortDto> getEventsWithoutSort(
+            String text,
+            List<Long> categories,
+            Boolean paid,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd,
+            Boolean onlyAvailable,
+            int from,
+            int size
+    ) {
+        PageRequest pg = PageRequest.of(from, size);
+
+        List<Event> events = eventRepository.findAll(
+                EventSpecs
+                        .hasTextInAnnotationOrDescription(text)
+                        .and(EventSpecs.hasEventCategory(categories))
+                        .and(EventSpecs.isPaid(paid))
+                        .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
+                        .and(EventSpecs.isEventAvailable(onlyAvailable)),
+                pg
+        ).toList();
+
+        return addViewsAndRequestsForShortEventDto(events, rangeStart, rangeEnd);
     }
 
     private List<EventShortDto> getEventsSortByViews(
@@ -97,38 +107,18 @@ public class EventServiceImpl implements EventService {
             int from,
             int size
     ) {
-        Map<String, ViewStats> viewStatsMap = new HashMap<>();
-
-        List<EventShortDto> events = eventRepository.findAll(
+        List<Event> events = eventRepository.findAll(
                 EventSpecs
                         .hasTextInAnnotationOrDescription(text)
                         .and(EventSpecs.hasEventCategory(categories))
                         .and(EventSpecs.isPaid(paid))
                         .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
                         .and(EventSpecs.isEventAvailable(onlyAvailable))
-        ).stream().map(e -> {
-            viewStatsMap.put("/events/" + e.getId(), null);
-            EventShortDto res = EventMapper.toEventShortDto(e);
-            res.setConfirmedRequests(getConfirmedRequestsCountForEvent(e));
+        );
 
-            return res;
-        }).collect(Collectors.toList());
+        List<EventShortDto> res = addViewsAndRequestsForShortEventDto(events, rangeStart, rangeEnd);
 
-        statisticClient.getStats(rangeStart, rangeEnd, viewStatsMap.keySet(), false)
-                .forEach(vs -> viewStatsMap.put(vs.getUri(), vs));
-
-        events.forEach(e -> {
-            String eventUrl = "/events/" + e.getId();
-            ViewStats viewStats = viewStatsMap.get(eventUrl);
-
-            if (viewStats != null) {
-                e.setViews(viewStats.getHits());
-            } else {
-                e.setViews(0);
-            }
-        });
-
-        events.sort((Comparator.comparingInt(EventShortDto::getViews).reversed()));
+        res.sort((Comparator.comparingInt(EventShortDto::getViews).reversed()));
 
         size = from + size;
 
@@ -136,7 +126,7 @@ public class EventServiceImpl implements EventService {
             size = events.size();
         }
 
-        return events.subList(from, size);
+        return res.subList(from, size);
     }
 
     private List<EventShortDto> getEventsSortByEventDate(
@@ -150,9 +140,8 @@ public class EventServiceImpl implements EventService {
             int size
     ) {
         PageRequest pg = PageRequest.of(from, size, Sort.by("eventDate"));
-        Map<String, ViewStats> viewStatsMap = new HashMap<>();
 
-        List<EventShortDto> events = eventRepository.findAll(
+        List<Event> events = eventRepository.findAll(
                 EventSpecs
                         .hasTextInAnnotationOrDescription(text)
                         .and(EventSpecs.hasEventCategory(categories))
@@ -160,17 +149,30 @@ public class EventServiceImpl implements EventService {
                         .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
                         .and(EventSpecs.isEventAvailable(onlyAvailable)),
                 pg
-        ).map(e -> {
-            viewStatsMap.put("/events/" + e.getId(), null);
-            EventShortDto res = EventMapper.toEventShortDto(e);
-            res.setConfirmedRequests(getConfirmedRequestsCountForEvent(e));
-            return res;
-        }).toList();
+        ).toList();
+
+        return addViewsAndRequestsForShortEventDto(events, rangeStart, rangeEnd);
+    }
+
+    private List<EventShortDto> addViewsAndRequestsForShortEventDto(
+            List<Event> events,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd
+    ) {
+        Map<String, ViewStats> viewStatsMap = new HashMap<>();
+
+        List<EventShortDto> res = events.stream()
+                .map(e -> {
+                    viewStatsMap.put("/events/" + e.getId(), null);
+                    EventShortDto shortDto = EventMapper.toEventShortDto(e);
+                    shortDto.setConfirmedRequests(getConfirmedRequestsCountForEvent(e));
+                    return shortDto;
+                }).collect(Collectors.toList());
 
         statisticClient.getStats(rangeStart, rangeEnd, viewStatsMap.keySet(), false)
                 .forEach(vs -> viewStatsMap.put(vs.getUri(), vs));
 
-        events.forEach(e -> {
+        res.forEach(e -> {
             String eventUrl = "/events/" + e.getId();
             ViewStats viewStats = viewStatsMap.get(eventUrl);
 
@@ -181,16 +183,33 @@ public class EventServiceImpl implements EventService {
             }
         });
 
-        return events;
+        return res;
+    }
+
+    private EventFullDto addViewsAndRequestsForEventFullDto(
+            Event event
+    ) {
+        Set<String> uri = Set.of("/events/" + event.getId());
+        LocalDateTime rangeStart = event.getCreatedOn();
+        LocalDateTime rangeEnd = LocalDateTime.now();
+
+        Optional<ViewStats> vs = statisticClient.getStats(rangeStart, rangeEnd, uri, false)
+                .stream().findFirst();
+
+        EventFullDto res = EventMapper.toEventFullDto(event);
+
+        vs.ifPresent(viewStats -> res.setViews(viewStats.getHits()));
+
+        res.setConfirmedRequests(getConfirmedRequestsCountForEvent(event));
+
+        return res;
     }
 
     @Override
     public EventFullDto getEventById(long id) {
         Event event = findEventById(id);
-        int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
-        EventFullDto fullDto = EventMapper.toEventFullDto(event);
-        fullDto.setConfirmedRequests(confirmedRequestCount);
-        return fullDto;
+
+        return addViewsAndRequestsForEventFullDto(event);
     }
 
     @Override
@@ -201,16 +220,9 @@ public class EventServiceImpl implements EventService {
 
         PageRequest pageRequest = PageRequest.of(from, size);
 
-        return eventRepository
-                .findAllByInitiator(initiator, pageRequest)
-                .map(event -> {
-                    int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
-                    EventShortDto shortDto = EventMapper.toEventShortDto(event);
-                    shortDto.setConfirmedRequests(confirmedRequestCount);
+        List<Event> events = eventRepository.findAllByInitiator(initiator, pageRequest).toList();
 
-                    return shortDto;
-                })
-                .toList();
+        return addViewsAndRequestsForShortEventDto(events, LocalDateTime.MIN, LocalDateTime.now());
     }
 
     @Override
@@ -285,7 +297,7 @@ public class EventServiceImpl implements EventService {
             event.setTitle(eventUpdateDto.getTitle());
         }
 
-        return EventMapper.toEventFullDto(event);
+        return addViewsAndRequestsForEventFullDto(event);
     }
 
     @Override
@@ -322,7 +334,7 @@ public class EventServiceImpl implements EventService {
 
         eventRepository.save(event);
 
-        return EventMapper.toEventFullDto(event);
+        return addViewsAndRequestsForEventFullDto(event);
 
     }
 
@@ -333,11 +345,7 @@ public class EventServiceImpl implements EventService {
 
         isInitiatorOrException(event, userId);
 
-        int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
-        EventFullDto fullDto = EventMapper.toEventFullDto(event);
-        fullDto.setConfirmedRequests(confirmedRequestCount);
-
-        return fullDto;
+        return addViewsAndRequestsForEventFullDto(event);
     }
 
     @Override
@@ -354,7 +362,7 @@ public class EventServiceImpl implements EventService {
         EventFullDto fullDto = EventMapper.toEventFullDto(event);
         fullDto.setConfirmedRequests(confirmedRequestCount);
 
-        return EventMapper.toEventFullDto(event);
+        return addViewsAndRequestsForEventFullDto(event);
     }
 
     @Override
@@ -423,7 +431,7 @@ public class EventServiceImpl implements EventService {
         Event event = findEventById(eventId);
         event.setState(EventState.PUBLISHED);
 
-        return EventMapper.toEventFullDto(event);
+        return addViewsAndRequestsForEventFullDto(event);
     }
 
     @Override
@@ -432,7 +440,7 @@ public class EventServiceImpl implements EventService {
         Event event = findEventById(eventId);
         event.setState(EventState.CANCELED);
 
-        return EventMapper.toEventFullDto(event);
+        return addViewsAndRequestsForEventFullDto(event);
     }
 
     @Override
