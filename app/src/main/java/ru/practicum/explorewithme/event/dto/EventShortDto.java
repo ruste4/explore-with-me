@@ -4,10 +4,13 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 public class EventShortDto {
-
+    @EqualsAndHashCode.Include
     private long id;
 
     private String annotation;

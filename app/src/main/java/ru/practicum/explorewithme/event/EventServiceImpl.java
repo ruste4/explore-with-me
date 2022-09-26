@@ -28,6 +28,7 @@ import ru.practicum.explorewithme.user.exception.UserNotFoundException;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,10 +66,14 @@ public class EventServiceImpl implements EventService {
     ) {
         switch (sort) {
             case EVENT_DATE:
-                PageRequest pg = PageRequest.of(from, size, Sort.by("eventDate"));
-                Map<String, ViewStats> viewStatsMap = new HashMap<>();
+                return getEventsSortByEventDate(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, from, size);
+            case VIEWS:
+                return getEventsSortByViews(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, from, size);
 
-                List<EventShortDto> events = eventRepository.findAll(
+            default:
+                PageRequest pg = PageRequest.of(from, size);
+
+                return eventRepository.findAll(
                         EventSpecs
                                 .hasTextInAnnotationOrDescription(text)
                                 .and(EventSpecs.hasEventCategory(categories))
@@ -76,52 +81,107 @@ public class EventServiceImpl implements EventService {
                                 .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
                                 .and(EventSpecs.isEventAvailable(onlyAvailable)),
                         pg
-                ).map(e -> {
-                    viewStatsMap.put("/events/" + e.getId(), null);
-                    EventShortDto res =  EventMapper.toEventShortDto(e);
-                    res.setConfirmedRequests(getConfirmedRequestsCountForEvent(e));
-
-                    return res;
-                }).toList();
-
-                statisticClient.getStats(rangeStart, rangeEnd, viewStatsMap.keySet(), false)
-                        .forEach(vs -> viewStatsMap.put(vs.getUri(), vs));
-
-                events.forEach(e -> {
-                    String eventUrl = "/events/" + e.getId();
-                    ViewStats viewStats = viewStatsMap.get(eventUrl);
-
-                    if (viewStats != null) {
-                        e.setViews(viewStats.getHits());
-                    } else {
-                        e.setViews(0);
-                    }
-                });
-
-                return events;
-            case VIEWS:
-
-                return eventRepository.findAll(
-                        EventSpecs
-                                .hasTextInAnnotationOrDescription(text)
-                                .and(EventSpecs.hasEventCategory(categories))
-                                .and(EventSpecs.isPaid(paid))
-                                .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
-                                .and(EventSpecs.isEventAvailable(onlyAvailable))
-                ).stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
-
-            default:
-                return eventRepository.findAll(
-                        EventSpecs
-                                .hasTextInAnnotationOrDescription(text)
-                                .and(EventSpecs.hasEventCategory(categories))
-                                .and(EventSpecs.isPaid(paid))
-                                .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
-                                .and(EventSpecs.isEventAvailable(onlyAvailable))
                 ).stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
 
         }
 
+    }
+
+    private List<EventShortDto> getEventsSortByViews(
+            String text,
+            List<Long> categories,
+            Boolean paid,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd,
+            Boolean onlyAvailable,
+            int from,
+            int size
+    ) {
+        Map<String, ViewStats> viewStatsMap = new HashMap<>();
+
+        List<EventShortDto> events = eventRepository.findAll(
+                EventSpecs
+                        .hasTextInAnnotationOrDescription(text)
+                        .and(EventSpecs.hasEventCategory(categories))
+                        .and(EventSpecs.isPaid(paid))
+                        .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
+                        .and(EventSpecs.isEventAvailable(onlyAvailable))
+        ).stream().map(e -> {
+            viewStatsMap.put("/events/" + e.getId(), null);
+            EventShortDto res = EventMapper.toEventShortDto(e);
+            res.setConfirmedRequests(getConfirmedRequestsCountForEvent(e));
+
+            return res;
+        }).collect(Collectors.toList());
+
+        statisticClient.getStats(rangeStart, rangeEnd, viewStatsMap.keySet(), false)
+                .forEach(vs -> viewStatsMap.put(vs.getUri(), vs));
+
+        events.forEach(e -> {
+            String eventUrl = "/events/" + e.getId();
+            ViewStats viewStats = viewStatsMap.get(eventUrl);
+
+            if (viewStats != null) {
+                e.setViews(viewStats.getHits());
+            } else {
+                e.setViews(0);
+            }
+        });
+
+        events.sort((Comparator.comparingInt(EventShortDto::getViews).reversed()));
+
+        size = from + size;
+
+        if (size > events.size()) {
+            size = events.size();
+        }
+
+        return events.subList(from, size);
+    }
+
+    private List<EventShortDto> getEventsSortByEventDate(
+            String text,
+            List<Long> categories,
+            Boolean paid,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd,
+            Boolean onlyAvailable,
+            int from,
+            int size
+    ) {
+        PageRequest pg = PageRequest.of(from, size, Sort.by("eventDate"));
+        Map<String, ViewStats> viewStatsMap = new HashMap<>();
+
+        List<EventShortDto> events = eventRepository.findAll(
+                EventSpecs
+                        .hasTextInAnnotationOrDescription(text)
+                        .and(EventSpecs.hasEventCategory(categories))
+                        .and(EventSpecs.isPaid(paid))
+                        .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
+                        .and(EventSpecs.isEventAvailable(onlyAvailable)),
+                pg
+        ).map(e -> {
+            viewStatsMap.put("/events/" + e.getId(), null);
+            EventShortDto res = EventMapper.toEventShortDto(e);
+            res.setConfirmedRequests(getConfirmedRequestsCountForEvent(e));
+            return res;
+        }).toList();
+
+        statisticClient.getStats(rangeStart, rangeEnd, viewStatsMap.keySet(), false)
+                .forEach(vs -> viewStatsMap.put(vs.getUri(), vs));
+
+        events.forEach(e -> {
+            String eventUrl = "/events/" + e.getId();
+            ViewStats viewStats = viewStatsMap.get(eventUrl);
+
+            if (viewStats != null) {
+                e.setViews(viewStats.getHits());
+            } else {
+                e.setViews(0);
+            }
+        });
+
+        return events;
     }
 
     @Override
@@ -150,7 +210,7 @@ public class EventServiceImpl implements EventService {
 
                     return shortDto;
                 })
-                .toList(); // todo в этом месте каждому EventShortDto згенерируй views
+                .toList();
     }
 
     @Override
