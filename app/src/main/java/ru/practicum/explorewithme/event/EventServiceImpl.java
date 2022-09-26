@@ -94,7 +94,7 @@ public class EventServiceImpl implements EventService {
                 pg
         ).toList();
 
-        return addViewsAndRequestsForShortEventDto(events, rangeStart, rangeEnd);
+        return addViewsAndRequestsForShortEventDto(events);
     }
 
     private List<EventShortDto> getEventsSortByViews(
@@ -116,7 +116,7 @@ public class EventServiceImpl implements EventService {
                         .and(EventSpecs.isEventAvailable(onlyAvailable))
         );
 
-        List<EventShortDto> res = addViewsAndRequestsForShortEventDto(events, rangeStart, rangeEnd);
+        List<EventShortDto> res = addViewsAndRequestsForShortEventDto(events);
 
         res.sort((Comparator.comparingInt(EventShortDto::getViews).reversed()));
 
@@ -151,14 +151,10 @@ public class EventServiceImpl implements EventService {
                 pg
         ).toList();
 
-        return addViewsAndRequestsForShortEventDto(events, rangeStart, rangeEnd);
+        return addViewsAndRequestsForShortEventDto(events);
     }
 
-    private List<EventShortDto> addViewsAndRequestsForShortEventDto(
-            List<Event> events,
-            LocalDateTime rangeStart,
-            LocalDateTime rangeEnd
-    ) {
+    private List<EventShortDto> addViewsAndRequestsForShortEventDto(List<Event> events) {
         Map<String, ViewStats> viewStatsMap = new HashMap<>();
 
         List<EventShortDto> res = events.stream()
@@ -169,7 +165,7 @@ public class EventServiceImpl implements EventService {
                     return shortDto;
                 }).collect(Collectors.toList());
 
-        statisticClient.getStats(rangeStart, rangeEnd, viewStatsMap.keySet(), false)
+        statisticClient.getStats(LocalDateTime.MIN, LocalDateTime.now(), viewStatsMap.keySet(), false)
                 .forEach(vs -> viewStatsMap.put(vs.getUri(), vs));
 
         res.forEach(e -> {
@@ -186,9 +182,7 @@ public class EventServiceImpl implements EventService {
         return res;
     }
 
-    private EventFullDto addViewsAndRequestsForEventFullDto(
-            Event event
-    ) {
+    private EventFullDto addViewsAndRequestsForEventFullDto(Event event) {
         Set<String> uri = Set.of("/events/" + event.getId());
         LocalDateTime rangeStart = event.getCreatedOn();
         LocalDateTime rangeEnd = LocalDateTime.now();
@@ -201,6 +195,34 @@ public class EventServiceImpl implements EventService {
         vs.ifPresent(viewStats -> res.setViews(viewStats.getHits()));
 
         res.setConfirmedRequests(getConfirmedRequestsCountForEvent(event));
+
+        return res;
+    }
+
+    private List<EventFullDto> addViewsAndRequestsForEventFullDto(List<Event> events) {
+        Map<String, ViewStats> viewStatsMap = new HashMap<>();
+
+        List<EventFullDto> res = events.stream()
+                .map(e -> {
+                    viewStatsMap.put("/events/" + e.getId(), null);
+                    EventFullDto fullDto = EventMapper.toEventFullDto(e);
+                    fullDto.setConfirmedRequests(getConfirmedRequestsCountForEvent(e));
+                    return fullDto;
+                }).collect(Collectors.toList());
+
+        statisticClient.getStats(LocalDateTime.MIN, LocalDateTime.now(), viewStatsMap.keySet(), false)
+                .forEach(vs -> viewStatsMap.put(vs.getUri(), vs));
+
+        res.forEach(e -> {
+            String eventUrl = "/events/" + e.getId();
+            ViewStats viewStats = viewStatsMap.get(eventUrl);
+
+            if (viewStats != null) {
+                e.setViews(viewStats.getHits());
+            } else {
+                e.setViews(0);
+            }
+        });
 
         return res;
     }
@@ -222,7 +244,7 @@ public class EventServiceImpl implements EventService {
 
         List<Event> events = eventRepository.findAllByInitiator(initiator, pageRequest).toList();
 
-        return addViewsAndRequestsForShortEventDto(events, LocalDateTime.MIN, LocalDateTime.now());
+        return addViewsAndRequestsForShortEventDto(events);
     }
 
     @Override
@@ -454,18 +476,14 @@ public class EventServiceImpl implements EventService {
             Integer size
     ) {
         PageRequest pageRequest = PageRequest.of(from, size);
-        return eventRepository.findAll(EventSpecs
+        List<Event> events =  eventRepository.findAll(EventSpecs
                         .hasInitiationIds(users)
                         .and(EventSpecs.hasEventStates(states))
                         .and(EventSpecs.hasEventCategory(categories)),
                 pageRequest
-        ).map(event -> {
-            int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
-            EventFullDto fullDto = EventMapper.toEventFullDto(event);
-            fullDto.setConfirmedRequests(confirmedRequestCount);
+        ).toList();
 
-            return fullDto;
-        }).toList();
+        return addViewsAndRequestsForEventFullDto(events);
     }
 
     private Event findEventById(long id) {
