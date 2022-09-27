@@ -1,7 +1,9 @@
 package ru.practicum.explorewithme.event.exception;
 
-public class UserIsNotInitiatorException extends RuntimeException {
-    public UserIsNotInitiatorException(String message) {
-        super(message);
+import ru.practicum.explorewithme.exception.ConflictException;
+
+public class UserIsNotInitiatorException extends ConflictException {
+    public UserIsNotInitiatorException(String reason) {
+        super("User is not initiator", reason);
     }
 }

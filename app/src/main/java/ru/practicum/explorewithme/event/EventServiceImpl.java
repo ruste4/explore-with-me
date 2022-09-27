@@ -330,7 +330,7 @@ public class EventServiceImpl implements EventService {
         User user = findUserById(userId);
 
         if (!user.isActivated()) {
-            throw new UserInActivatedException(String.format("User with id:%s is not activated", userId));
+            throw new UserNotActivatedException(String.format("User with id:%s is not activated", userId));
         }
 
         if (!isValidEventDate) {

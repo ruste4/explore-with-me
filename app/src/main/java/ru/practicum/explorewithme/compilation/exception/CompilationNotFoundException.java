@@ -1,7 +1,9 @@
 package ru.practicum.explorewithme.compilation.exception;
 
-public class CompilationNotFoundException extends RuntimeException {
-    public CompilationNotFoundException(String message) {
-        super(message);
+import ru.practicum.explorewithme.exception.NotFoundException;
+
+public class CompilationNotFoundException extends NotFoundException {
+    public CompilationNotFoundException(String reason) {
+        super("Compilation not found", reason);
     }
 }

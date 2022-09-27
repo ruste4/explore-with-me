@@ -20,8 +20,7 @@ import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 import ru.practicum.explorewithme.event.exception.EventDateInvalidException;
 import ru.practicum.explorewithme.event.exception.EventUpdatingIsProhibitedException;
-import ru.practicum.explorewithme.event.exception.UserInActivatedException;
-import ru.practicum.explorewithme.event.requestparams.SearchEventParams;
+import ru.practicum.explorewithme.event.exception.UserNotActivatedException;
 import ru.practicum.explorewithme.user.User;
 
 import javax.transaction.Transactional;
@@ -149,7 +148,7 @@ class EventServiceTest {
         Long userId = testEntityManager.persistAndGetId(user, Long.class);
         EventCreateDto eventCreateDto = createDtoSupplier.get();
 
-        assertThrows(UserInActivatedException.class, () -> eventService.addEvent(userId, eventCreateDto));
+        assertThrows(UserNotActivatedException.class, () -> eventService.addEvent(userId, eventCreateDto));
     }
 
     private long generateEventCategoryAndGetId(String name) {

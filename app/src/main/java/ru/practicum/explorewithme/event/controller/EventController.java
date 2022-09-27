@@ -40,9 +40,18 @@ public class EventController {
             @Positive @RequestParam(defaultValue = "100") int size,
             HttpServletRequest request
     ) {
+        LocalDateTime start = null;
+        LocalDateTime end = null;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime start = LocalDateTime.parse(rangeStart, formatter);
-        LocalDateTime end = LocalDateTime.parse(rangeEnd, formatter);
+
+        if (rangeStart != null) {
+            start = LocalDateTime.parse(rangeStart, formatter);
+        }
+
+        if (rangeEnd != null) {
+            end = LocalDateTime.parse(rangeEnd, formatter);
+        }
+
         EventSort eventSort = EventSort.valueOf(sort);
 
         statisticClient.sendHitAtStaticServer("ExploreWithMe", request.getRequestURI(), request.getRemoteAddr());

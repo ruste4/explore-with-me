@@ -1,7 +1,9 @@
 package ru.practicum.explorewithme.request.exception;
 
-public class RequesterIsInitiatorEventException extends RuntimeException {
-    public RequesterIsInitiatorEventException(String message) {
-        super(message);
+import ru.practicum.explorewithme.exception.ConflictException;
+
+public class RequesterIsInitiatorEventException extends ConflictException {
+    public RequesterIsInitiatorEventException(String reason) {
+        super("Requester is initiator for event", reason);
     }
 }

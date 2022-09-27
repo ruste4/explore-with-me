@@ -1,7 +1,9 @@
 package ru.practicum.explorewithme.request.exception;
 
-public class RequestNotFoundException extends RuntimeException {
-    public RequestNotFoundException(String message) {
-        super(message);
+import ru.practicum.explorewithme.exception.NotFoundException;
+
+public class RequestNotFoundException extends NotFoundException {
+    public RequestNotFoundException(String reason) {
+        super("Request not found", reason);
     }
 }

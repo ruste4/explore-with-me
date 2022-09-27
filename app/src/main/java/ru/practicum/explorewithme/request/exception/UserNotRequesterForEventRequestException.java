@@ -1,7 +1,9 @@
 package ru.practicum.explorewithme.request.exception;
 
-public class UserNotRequesterForEventRequestException extends RuntimeException {
-    public UserNotRequesterForEventRequestException(String message) {
-        super(message);
+import ru.practicum.explorewithme.exception.ConflictException;
+
+public class UserNotRequesterForEventRequestException extends ConflictException {
+    public UserNotRequesterForEventRequestException(String reason) {
+        super("User not requester for request", reason);
     }
 }

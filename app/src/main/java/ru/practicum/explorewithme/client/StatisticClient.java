@@ -42,15 +42,6 @@ public class StatisticClient {
         urlParam.put("uris", String.join(",", uris));
         urlParam.put("unique", Boolean.toString(unique));
 
-        log.warn(
-                "==>> Send request with parametrs :\nstart: {}\nend: {}\nuris: {}\nunique: {}",
-                urlParam.get("start"),
-                urlParam.get("end"),
-                urlParam.get("uris"),
-                urlParam.get("unique")
-        );
-
-
         ResponseEntity<ViewStats[]> entity = rest.getForEntity(requestUri, ViewStats[].class, urlParam);
 
         return entity.getBody() != null ? Arrays.asList(entity.getBody()) : Collections.emptyList();

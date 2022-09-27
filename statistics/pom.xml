@@ -4,16 +4,15 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>ru.practicum</groupId>
-		<artifactId>explore-with-me</artifactId>
+		<artifactId>exploreWithMe</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>statistics</artifactId>
+
+	<artifactId>statistics-for-explore-with-me-application</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
 	<name>statistics</name>
-	<description>Demo project for Spring Boot</description>
-	<properties>
-		<java.version>11</java.version>
-	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.h2database</groupId>

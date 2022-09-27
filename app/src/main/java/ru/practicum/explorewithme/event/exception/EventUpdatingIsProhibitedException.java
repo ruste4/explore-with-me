@@ -1,7 +1,9 @@
 package ru.practicum.explorewithme.event.exception;
 
-public class EventUpdatingIsProhibitedException extends RuntimeException {
-    public EventUpdatingIsProhibitedException(String message) {
-        super(message);
+import ru.practicum.explorewithme.exception.ConditionsNotMetException;
+
+public class EventUpdatingIsProhibitedException extends ConditionsNotMetException {
+    public EventUpdatingIsProhibitedException(String reason) {
+        super("Event updating is prohibited", reason);
     }
 }

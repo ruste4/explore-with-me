@@ -4,16 +4,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>ru.practicum</groupId>
-		<artifactId>explore-with-me</artifactId>
+		<artifactId>exploreWithMe</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>app</artifactId>
+	<artifactId>explore-with-me-application</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
 	<name>app</name>
-	<description>Demo project for Spring Boot</description>
-	<properties>
-		<java.version>11</java.version>
-	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.h2database</groupId>
@@ -47,8 +45,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>jakarta.validation</groupId>
-			<artifactId>jakarta.validation-api</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+			<version>2.7.4</version>
 		</dependency>
 	</dependencies>
 

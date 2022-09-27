@@ -1,7 +1,9 @@
 package ru.practicum.explorewithme.event.exception;
 
-public class EventAlreadyExistException extends RuntimeException {
-    public EventAlreadyExistException(String message) {
-        super(message);
+import ru.practicum.explorewithme.exception.AlreadyExistException;
+
+public class EventAlreadyExistException extends AlreadyExistException {
+    public EventAlreadyExistException(String reason) {
+        super("Event already exist", reason);
     }
 }

@@ -1,7 +1,9 @@
 package ru.practicum.explorewithme.event.exception;
 
-public class EventDateInvalidException extends RuntimeException {
-    public EventDateInvalidException(String message) {
-        super(message);
+import ru.practicum.explorewithme.exception.ConditionsNotMetException;
+
+public class EventDateInvalidException extends ConditionsNotMetException {
+    public EventDateInvalidException(String reason) {
+        super("Event date invalid", reason);
     }
 }

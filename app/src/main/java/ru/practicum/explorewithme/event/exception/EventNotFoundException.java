@@ -1,7 +1,9 @@
 package ru.practicum.explorewithme.event.exception;
 
-public class EventNotFoundException extends RuntimeException {
-    public EventNotFoundException(String message) {
-        super(message);
+import ru.practicum.explorewithme.exception.NotFoundException;
+
+public class EventNotFoundException extends NotFoundException {
+    public EventNotFoundException(String reason) {
+        super("Event not found", reason);
     }
 }

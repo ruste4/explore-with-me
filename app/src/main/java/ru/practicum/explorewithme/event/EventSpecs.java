@@ -55,7 +55,20 @@ public class EventSpecs {
     }
 
     public static Specification<Event> betweenDates(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
+        if (rangeStart == null && rangeEnd == null) {
+            return (root, query, builder) -> builder.greaterThan(root.get(Event_.eventDate), LocalDateTime.now());
+        }
+
+        if (rangeStart != null && rangeEnd == null) {
+            return (root, query, builder) -> builder.greaterThan(root.get(Event_.eventDate), rangeStart);
+        }
+
+        if (rangeStart == null && rangeEnd != null) {
+            return (root, query, builder) -> builder.between(root.get(Event_.eventDate), LocalDateTime.now(), rangeEnd);
+        }
+
         return (root, query, builder) -> builder.between(root.get(Event_.eventDate), rangeStart, rangeEnd);
+
     }
 
     public static Specification<Event> hasTextInAnnotationOrDescription(String text) {
