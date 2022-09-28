@@ -165,8 +165,14 @@ public class EventServiceImpl implements EventService {
                     return shortDto;
                 }).collect(Collectors.toList());
 
-        statisticClient.getStats(LocalDateTime.MIN, LocalDateTime.now(), viewStatsMap.keySet(), false)
-                .forEach(vs -> viewStatsMap.put(vs.getUri(), vs));
+        Event eventWithMinCreatedOn = events.stream().min(Comparator.comparing(Event::getCreatedOn)).orElseThrow();
+
+        statisticClient.getStats(
+                eventWithMinCreatedOn.getCreatedOn(),
+                LocalDateTime.now(),
+                viewStatsMap.keySet(),
+                false
+        ).forEach(vs -> viewStatsMap.put(vs.getUri(), vs));
 
         res.forEach(e -> {
             String eventUrl = "/events/" + e.getId();
@@ -210,8 +216,14 @@ public class EventServiceImpl implements EventService {
                     return fullDto;
                 }).collect(Collectors.toList());
 
-        statisticClient.getStats(LocalDateTime.MIN, LocalDateTime.now(), viewStatsMap.keySet(), false)
-                .forEach(vs -> viewStatsMap.put(vs.getUri(), vs));
+        Event eventWithMinCreatedOn = events.stream().min(Comparator.comparing(Event::getCreatedOn)).orElseThrow();
+
+        statisticClient.getStats(
+                eventWithMinCreatedOn.getCreatedOn(),
+                LocalDateTime.now(),
+                viewStatsMap.keySet(),
+                false
+        ).forEach(vs -> viewStatsMap.put(vs.getUri(), vs));
 
         res.forEach(e -> {
             String eventUrl = "/events/" + e.getId();
@@ -476,7 +488,7 @@ public class EventServiceImpl implements EventService {
             Integer size
     ) {
         PageRequest pageRequest = PageRequest.of(from, size);
-        List<Event> events =  eventRepository.findAll(EventSpecs
+        List<Event> events = eventRepository.findAll(EventSpecs
                         .hasInitiationIds(users)
                         .and(EventSpecs.hasEventStates(states))
                         .and(EventSpecs.hasEventCategory(categories)),
