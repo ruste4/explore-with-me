@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import ru.practicum.explorewithme.compilation.dto.CompilationCreateDto;
 import ru.practicum.explorewithme.compilation.dto.CompilationDto;
 import ru.practicum.explorewithme.request.RequestRepository;
-import ru.practicum.explorewithme.request.RequestStatus;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +30,7 @@ public class CompilationMapper {
                             e.getCategory().getName()
                     );
 
-                    int confirmedRequest = requestRepository.findAllByEventAndStatus(e, RequestStatus.CONFIRMED).size();
+                    int confirmedRequest = requestRepository.findByEvent(e).size();
 
                     CompilationDto.User initiator = new CompilationDto.User(
                             e.getInitiator().getId(),

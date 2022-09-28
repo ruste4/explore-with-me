@@ -27,11 +27,11 @@ public class EndpointHitRepositoryCustomImpl implements EndpointHitRepositoryCus
 
         if (params.isUnique()) {
             query.multiselect(root.get(EndpointHit_.app), root.get(EndpointHit_.uri), builder.countDistinct(root.get(EndpointHit_.ip)));
-            query.groupBy(root.get(EndpointHit_.uri));
         } else {
             query.multiselect(root.get(EndpointHit_.app), root.get(EndpointHit_.uri), builder.count(root));
-            query.groupBy(root.get(EndpointHit_.uri));
         }
+
+        query.groupBy(root.get(EndpointHit_.app), root.get(EndpointHit_.uri));
 
         return entityManager.createQuery(query).getResultList();
     }

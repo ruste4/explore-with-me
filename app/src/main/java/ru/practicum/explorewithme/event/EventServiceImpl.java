@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.practicum.explorewithme.client.StatisticClient;
 import ru.practicum.explorewithme.client.dto.ViewStats;
@@ -392,7 +393,7 @@ public class EventServiceImpl implements EventService {
 
         event.setState(EventState.CANCELED);
 
-        int confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
+        long confirmedRequestCount = getConfirmedRequestsCountForEvent(event);
         EventFullDto fullDto = EventMapper.toEventFullDto(event);
         fullDto.setConfirmedRequests(confirmedRequestCount);
 
@@ -488,12 +489,12 @@ public class EventServiceImpl implements EventService {
             Integer size
     ) {
         PageRequest pageRequest = PageRequest.of(from, size);
-        List<Event> events = eventRepository.findAll(EventSpecs
-                        .hasInitiationIds(users)
-                        .and(EventSpecs.hasEventStates(states))
-                        .and(EventSpecs.hasEventCategory(categories)),
-                pageRequest
-        ).toList();
+        Specification<Event> spec = EventSpecs
+                .hasInitiationIds(users)
+                .and(EventSpecs.hasEventCategory(categories));
+
+        List<Event> events = eventRepository.findAll(spec, pageRequest)
+                .filter(e -> states.contains(e.getState().getVal())).toList();
 
         return addViewsAndRequestsForEventFullDto(events);
     }
@@ -532,7 +533,8 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private int getConfirmedRequestsCountForEvent(Event event) {
-        return requestRepository.findAllByEventAndStatus(event, RequestStatus.CONFIRMED).size();
+    private long getConfirmedRequestsCountForEvent(Event event) {
+        List<Request> requests = requestRepository.findByEvent(event);
+        return requests.stream().filter(r -> r.getStatus().equals(RequestStatus.CONFIRMED)).count();
     }
 }
