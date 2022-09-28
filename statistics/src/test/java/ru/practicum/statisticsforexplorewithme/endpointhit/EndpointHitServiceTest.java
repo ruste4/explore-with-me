@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.statisticsforexplorewithme.endpointhit.dto.EndpointHitCreateDto;
 import ru.practicum.statisticsforexplorewithme.endpointhit.dto.EndpointHitDto;
 import ru.practicum.statisticsforexplorewithme.endpointhit.dto.ViewStats;
-import ru.practicum.statisticsforexplorewithme.endpointhit.requestparams.GetStatsParams;
 
 import javax.transaction.Transactional;
 

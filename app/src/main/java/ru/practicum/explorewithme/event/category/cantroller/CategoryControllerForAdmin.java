@@ -9,7 +9,6 @@ import ru.practicum.explorewithme.event.category.dto.CategoryCreateDto;
 import ru.practicum.explorewithme.event.category.dto.CategoryDto;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping(path = "/admin/categories")

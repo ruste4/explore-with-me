@@ -79,7 +79,7 @@ class RequestServiceTest {
                     .eventDate(LocalDateTime.now().plusDays(1))
                     .paid(false)
                     .initiator(generateAndPersistUser())
-                    .participantLimit(10l)
+                    .participantLimit(10L)
                     .location(new Location(14.2, 18.4))
                     .requestModeration(true)
                     .title("title " + nanoTime)
@@ -92,7 +92,9 @@ class RequestServiceTest {
         }
 
         return res;
-    };
+    }
+
+    ;
 
     private Category generateAndPersistEventCategory(String name) {
         Category category = new Category(null, name);
@@ -154,12 +156,13 @@ class RequestServiceTest {
         );
 
     }
+
     @Test
     public void addEventRequestFailParticipantLimitExceeded() {
         Map<Long, Event> eventMap = generateAndPersistEvent(1);
         Event event = eventMap.values().stream().findFirst().get();
         event.setState(EventState.PUBLISHED);
-        event.setParticipantLimit(1l);
+        event.setParticipantLimit(1L);
         User firstRequester = generateAndPersistUser();
         User secondRequester = generateAndPersistUser();
 
@@ -281,7 +284,7 @@ class RequestServiceTest {
         Map<Long, Event> eventMap = generateAndPersistEvent(1);
         Event event = eventMap.values().stream().findFirst().get();
         event.setState(EventState.PUBLISHED);
-        event.setParticipantLimit(1l);
+        event.setParticipantLimit(1L);
         User firstRequester = generateAndPersistUser();
         User secondRequester = generateAndPersistUser();
 

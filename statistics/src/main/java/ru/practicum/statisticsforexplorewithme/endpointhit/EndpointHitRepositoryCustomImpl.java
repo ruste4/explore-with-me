@@ -1,7 +1,6 @@
 package ru.practicum.statisticsforexplorewithme.endpointhit;
 
 import lombok.RequiredArgsConstructor;
-import ru.practicum.statisticsforexplorewithme.endpointhit.dto.ViewStats;
 import ru.practicum.statisticsforexplorewithme.endpointhit.requestparams.GetStatsParams;
 
 import javax.persistence.EntityManager;

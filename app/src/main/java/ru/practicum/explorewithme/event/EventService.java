@@ -4,7 +4,6 @@ import ru.practicum.explorewithme.event.dto.EventCreateDto;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.EventUpdateDto;
-import ru.practicum.explorewithme.event.requestparams.GetEventsParams;
 import ru.practicum.explorewithme.request.dto.RequestFullDto;
 
 import java.time.LocalDateTime;

@@ -2,7 +2,6 @@ package ru.practicum.explorewithme.event.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.repository.query.Param;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.event.EventService;
@@ -10,7 +9,6 @@ import ru.practicum.explorewithme.event.dto.EventCreateDto;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.EventUpdateDto;
-import ru.practicum.explorewithme.request.RequestService;
 import ru.practicum.explorewithme.request.dto.RequestFullDto;
 
 import javax.validation.Valid;

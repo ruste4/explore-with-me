@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.practicum.explorewithme.compilation.dto.CompilationDto;
 import ru.practicum.explorewithme.event.category.dto.CategoryCreateDto;
 import ru.practicum.explorewithme.event.category.dto.CategoryDto;
 import ru.practicum.explorewithme.event.category.exception.CategoryNotFoundException;
@@ -23,7 +22,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto add(CategoryCreateDto createDto) {
-        log.info("Add category: {}",createDto.getName());
+        log.info("Add category: {}", createDto.getName());
         Category category = CategoryMapper.toCategory(createDto);
         categoryRepository.save(category);
         log.info("Category with name: {} added, assigned id:{}", category.getName(), category.getId());

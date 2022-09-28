@@ -1,10 +1,8 @@
 package ru.practicum.statisticsforexplorewithme.endpointhit;
 
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.statisticsforexplorewithme.endpointhit.dto.EndpointHitCreateDto;
 import ru.practicum.statisticsforexplorewithme.endpointhit.dto.EndpointHitDto;
 import ru.practicum.statisticsforexplorewithme.endpointhit.dto.ViewStats;
-import ru.practicum.statisticsforexplorewithme.endpointhit.requestparams.GetStatsParams;
 
 import java.time.LocalDateTime;
 import java.util.List;

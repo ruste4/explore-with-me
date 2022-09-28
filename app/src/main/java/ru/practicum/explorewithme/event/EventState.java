@@ -1,7 +1,5 @@
 package ru.practicum.explorewithme.event;
 
-import java.util.Optional;
-
 public enum EventState {
 
     PENDING("PENDING"),

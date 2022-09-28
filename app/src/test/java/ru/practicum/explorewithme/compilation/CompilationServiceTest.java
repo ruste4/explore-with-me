@@ -194,7 +194,7 @@ class CompilationServiceTest {
                     .eventDate(LocalDateTime.now().plusDays(1))
                     .paid(false)
                     .initiator(generateAndPersistUser())
-                    .participantLimit(10l)
+                    .participantLimit(10L)
                     .requestModeration(true)
                     .title("title " + nanoTime)
                     .location(new Location(17.4, 20.1))

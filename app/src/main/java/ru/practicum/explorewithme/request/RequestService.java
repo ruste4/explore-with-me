@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.request;
 
-import ru.practicum.explorewithme.request.dto.RequestCreateDto;
 import ru.practicum.explorewithme.request.dto.RequestFullDto;
 
 import java.util.List;

@@ -101,7 +101,7 @@ public class CompilationServiceImpl implements CompilationService {
         return mapper.toCompilationDto(res);
     }
 
-    private Compilation findCompilationById (long id) {
+    private Compilation findCompilationById(long id) {
         return compilationRepository.findById(id).orElseThrow(
                 () -> new CompilationNotFoundException(String.format("Compilation with id:%s not found", id))
         );
