@@ -25,6 +25,7 @@ import ru.practicum.explorewithme.request.exception.ParticipantLimitExceededExce
 import ru.practicum.explorewithme.request.exception.RequestNotFoundException;
 import ru.practicum.explorewithme.user.User;
 import ru.practicum.explorewithme.user.UserRepository;
+import ru.practicum.explorewithme.user.exception.UserNotActivatedException;
 import ru.practicum.explorewithme.user.exception.UserNotFoundException;
 
 import javax.transaction.Transactional;

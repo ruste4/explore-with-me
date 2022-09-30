@@ -20,7 +20,7 @@ import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.EventUpdateDto;
 import ru.practicum.explorewithme.event.exception.EventDateInvalidException;
 import ru.practicum.explorewithme.event.exception.EventUpdatingIsProhibitedException;
-import ru.practicum.explorewithme.event.exception.UserNotActivatedException;
+import ru.practicum.explorewithme.user.exception.UserNotActivatedException;
 import ru.practicum.explorewithme.user.User;
 
 import javax.transaction.Transactional;
