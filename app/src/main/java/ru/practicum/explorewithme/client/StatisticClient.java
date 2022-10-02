@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.client;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -10,10 +9,10 @@ import ru.practicum.explorewithme.client.dto.HitDto;
 import ru.practicum.explorewithme.client.dto.ViewStats;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
-@Slf4j
 public class StatisticClient {
 
     private final RestTemplate rest;
@@ -35,10 +34,11 @@ public class StatisticClient {
 
     public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, Set<String> uris, boolean unique) {
         String requestUri = serverUrl + "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         Map<String, String> urlParam = new HashMap<>();
-        urlParam.put("start", start.toString());
-        urlParam.put("end", end.toString());
+        urlParam.put("start", start.format(formatter));
+        urlParam.put("end", end.format(formatter));
         urlParam.put("uris", String.join(",", uris));
         urlParam.put("unique", Boolean.toString(unique));
 

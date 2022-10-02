@@ -83,7 +83,7 @@ public class EventServiceImpl implements EventService {
             int from,
             int size
     ) {
-        PageRequest pg = PageRequest.of(from, size);
+        PageRequest request = PageRequest.of(from, size);
 
         List<Event> events = eventRepository.findAll(
                 EventSpecs
@@ -92,7 +92,7 @@ public class EventServiceImpl implements EventService {
                         .and(EventSpecs.isPaid(paid))
                         .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
                         .and(EventSpecs.isEventAvailable(onlyAvailable)),
-                pg
+                request
         ).toList();
 
         return addViewsAndRequestsForShortEventDto(events);
@@ -140,7 +140,7 @@ public class EventServiceImpl implements EventService {
             int from,
             int size
     ) {
-        PageRequest pg = PageRequest.of(from, size, Sort.by("eventDate"));
+        PageRequest request = PageRequest.of(from, size, Sort.by("eventDate"));
 
         List<Event> events = eventRepository.findAll(
                 EventSpecs
@@ -149,7 +149,7 @@ public class EventServiceImpl implements EventService {
                         .and(EventSpecs.isPaid(paid))
                         .and(EventSpecs.betweenDates(rangeStart, rangeEnd))
                         .and(EventSpecs.isEventAvailable(onlyAvailable)),
-                pg
+                request
         ).toList();
 
         return addViewsAndRequestsForShortEventDto(events);
@@ -242,9 +242,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventById(long id) {
-        Event event = findEventById(id);
-
-        return addViewsAndRequestsForEventFullDto(event);
+        return addViewsAndRequestsForEventFullDto(findEventById(id));
     }
 
     @Override
@@ -253,9 +251,9 @@ public class EventServiceImpl implements EventService {
 
         User initiator = findUserById(userId);
 
-        PageRequest pageRequest = PageRequest.of(from, size);
+        PageRequest request = PageRequest.of(from, size);
 
-        List<Event> events = eventRepository.findAllByInitiator(initiator, pageRequest).toList();
+        List<Event> events = eventRepository.findAllByInitiator(initiator, request).toList();
 
         return addViewsAndRequestsForShortEventDto(events);
     }
@@ -282,8 +280,8 @@ public class EventServiceImpl implements EventService {
 
         Event event = findEventById(eventId);
 
-        boolean isValidEventState = event.getState().equals(EventState.PENDING)
-                || event.getState().equals(EventState.CANCELED);
+        boolean isValidEventState = event.getState() == EventState.PENDING
+                || event.getState() == EventState.CANCELED;
 
 
         if (!isValidEventState) {
@@ -488,12 +486,12 @@ public class EventServiceImpl implements EventService {
             Integer from,
             Integer size
     ) {
-        PageRequest pageRequest = PageRequest.of(from, size);
+        PageRequest request = PageRequest.of(from, size);
         Specification<Event> spec = EventSpecs
                 .hasInitiationIds(users)
                 .and(EventSpecs.hasEventCategory(categories));
 
-        List<Event> events = eventRepository.findAll(spec, pageRequest)
+        List<Event> events = eventRepository.findAll(spec, request)
                 .filter(e -> states.contains(e.getState().getVal())).toList();
 
         return addViewsAndRequestsForEventFullDto(events);

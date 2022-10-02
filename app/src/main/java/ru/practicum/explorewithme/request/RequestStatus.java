@@ -10,8 +10,6 @@ public enum RequestStatus {
 
     CANCELED("CANCELED");
 
-
-
     private final String val;
 
     RequestStatus(String val) {

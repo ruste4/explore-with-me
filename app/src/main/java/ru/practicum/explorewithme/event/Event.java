@@ -22,44 +22,44 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "annotation")
+    @Column(name = "annotation", length = 4000, nullable = false)
     private String annotation;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     @ToString.Exclude
     private Category category;
 
-    @Column(name = "created_on")
+    @Column(name = "created_on", nullable = false)
     private LocalDateTime createdOn;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 4000, nullable = false)
     private String description;
 
-    @Column(name = "event_date")
+    @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "initiator_id")
+    @JoinColumn(name = "initiator_id", nullable = false)
     @ToString.Exclude
     private User initiator;
 
-    @Column(name = "paid")
+    @Column(name = "paid", nullable = false)
     private boolean paid;
 
-    @Column(name = "participant_limit")
+    @Column(name = "participant_limit", nullable = false)
     private Long participantLimit;
 
-    @Column(name = "published_on")
+    @Column(name = "published_on", nullable = false)
     private LocalDateTime publishedOn;
 
-    @Column(name = "request_moderation")
+    @Column(name = "request_moderation", nullable = false)
     private boolean requestModeration;
 
-    @Column(name = "in_state")
+    @Column(name = "in_state", length = 100)
     private EventState state;
 
-    @Column(name = "title")
+    @Column(name = "title", length = 4000, nullable = false)
     private String title;
 
     @Embedded

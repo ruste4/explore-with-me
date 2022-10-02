@@ -14,10 +14,10 @@ import javax.persistence.*;
 })
 public class Location {
 
-    @Column(name = "lat")
+    @Column(name = "lat", nullable = false)
     private Double lat;
 
-    @Column(name = "lon")
+    @Column(name = "lon", nullable = false)
     private Double lon;
 
 }
