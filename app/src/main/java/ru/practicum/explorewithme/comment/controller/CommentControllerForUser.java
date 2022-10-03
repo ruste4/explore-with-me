@@ -11,7 +11,7 @@ import ru.practicum.explorewithme.comment.dto.CommentUpdateDto;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping(path = "/user")
+@RequestMapping(path = "/users")
 @RequiredArgsConstructor
 @Validated
 public class CommentControllerForUser {
