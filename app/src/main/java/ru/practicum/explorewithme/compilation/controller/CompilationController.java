@@ -1,7 +1,6 @@
 package ru.practicum.explorewithme.compilation.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.compilation.CompilationService;
@@ -15,7 +14,6 @@ import java.util.List;
 @RequestMapping(path = "/compilations")
 @RequiredArgsConstructor
 @Validated
-@Slf4j
 public class CompilationController {
 
     private final CompilationService compilationService;

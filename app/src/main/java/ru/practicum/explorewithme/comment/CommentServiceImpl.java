@@ -2,6 +2,7 @@ package ru.practicum.explorewithme.comment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.explorewithme.comment.dto.CommentCreateDto;
 import ru.practicum.explorewithme.comment.dto.CommentFullDto;
@@ -35,6 +36,11 @@ public class CommentServiceImpl implements CommentService {
     public CommentFullDto addCommentByCurrentUser(long userId, CommentCreateDto createDto) {
         log.info("Add comment from user with id:{} by event with id:{}", userId, createDto.getEvent());
         User user = findUserById(userId);
+
+        if (!user.isActivated()) {
+            throw new UserNotActivatedException(String.format("User with id:%s not activated", userId));
+        }
+
         Comment comment = commentMapper.toComment(createDto);
         comment.setUser(user);
         Comment createdComment = commentRepository.save(comment);
@@ -44,6 +50,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentFullDto updateCommentByCurrentUser(long userId, CommentUpdateDto updateDto) {
+
         User user = findUserById(userId);
         Comment comment = findCommentById(updateDto.getId());
 
@@ -67,17 +74,28 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteCommentByCurrentUser(long userId, long commentId) {
+        User user = findUserById(userId);
+        Comment comment = findCommentById(commentId);
+        boolean isAuthorComment = comment.getUser().equals(user);
 
+        if (!isAuthorComment) {
+            throw new UserNotAuthorOfCommentException(
+                    String.format("User with id:%s not author for comment with id:%s", userId, commentId)
+            );
+        }
+
+        commentRepository.delete(comment);
     }
 
     @Override
     public List<Comment> getAllCommentsByEvent(long eventId, int from, int size) {
-        return null;
+        PageRequest request = PageRequest.of(from, size);
+        return commentRepository.findByEventId(eventId, request);
     }
 
     @Override
     public void deleteComment(long commentId) {
-
+        commentRepository.deleteById(commentId);
     }
 
     private User findUserById(long userId) {
