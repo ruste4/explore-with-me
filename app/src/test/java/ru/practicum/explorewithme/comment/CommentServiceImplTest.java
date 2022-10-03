@@ -135,7 +135,7 @@ class CommentServiceImplTest {
                 .build();
 
         assertThrows(UserNotActivatedException.class,
-                () -> commentService.updateCommentByCurrentUser( comment.getUser().getId(), updateDto)
+                () -> commentService.updateCommentByCurrentUser(comment.getUser().getId(), updateDto)
         );
     }
 
