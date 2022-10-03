@@ -18,14 +18,14 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email", unique = true, length = 512, nullable = false)
     private String email;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "activated")
-    private boolean activated;
+    private boolean activated = true;
 
     @Override
     public boolean equals(Object o) {

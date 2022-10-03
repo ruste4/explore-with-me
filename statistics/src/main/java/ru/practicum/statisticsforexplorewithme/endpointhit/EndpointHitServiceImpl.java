@@ -10,7 +10,6 @@ import ru.practicum.statisticsforexplorewithme.endpointhit.requestparams.GetStat
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -38,14 +37,7 @@ public class EndpointHitServiceImpl implements EndpointHitService {
                 .unique(unique)
                 .build();
 
-        return repository.getStats(params).stream()
-                .map(item -> ViewStats
-                        .builder()
-                        .app(item[0].toString())
-                        .uri(item[1].toString())
-                        .hits(Integer.valueOf(item[2].toString()))
-                        .build())
-                .collect(Collectors.toList());
+        return repository.getStats(params);
     }
 
 }

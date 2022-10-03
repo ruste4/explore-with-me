@@ -28,6 +28,14 @@
 		<module>statistics</module>
 	</modules>
 
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+			<version>2.7.4</version>
+		</dependency>
+	</dependencies>
+
 	<build>
 		<pluginManagement>
 			<plugins>

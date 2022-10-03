@@ -12,8 +12,8 @@ import java.time.format.DateTimeFormatter;
 @JsonComponent
 public class LocalDateTimeSerializer extends StdSerializer<LocalDateTime> {
 
-    public LocalDateTimeSerializer(Class<LocalDateTime> t) {
-        super(t);
+    public LocalDateTimeSerializer(Class<LocalDateTime> type) {
+        super(type);
     }
 
     public LocalDateTimeSerializer() {

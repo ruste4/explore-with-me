@@ -21,11 +21,11 @@ public class Compilation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title")
+    @Column(name = "title", length = 4000, nullable = false)
     private String title;
 
     @Column(name = "pinned")
-    private boolean pinned;
+    private boolean pinned = false;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "events_compilation", joinColumns = @JoinColumn(name = "compilation_id"))

@@ -16,6 +16,7 @@ import ru.practicum.explorewithme.user.exception.UserNotFoundException;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -104,14 +105,14 @@ public class RequestServiceImpl implements RequestService {
     }
 
     /**
-     * Проверить на отсутсвие похожего запроса
+     * Проверить на отсутствие похожего запроса
      *
      * @throws RequestAlreadyExistException если событие было добавлено ранее
      */
     private void checkEventRequestNotAlreadyExist(long userId, long eventId) {
         Optional<RequestFullDto> foundDuplicate = getEventRequestsFromCurrentUser(userId)
                 .stream()
-                .filter(r -> r.getEvent().equals(eventId))
+                .filter(r -> Objects.equals(r.getEvent(), eventId))
                 .findFirst();
 
         if (foundDuplicate.isPresent()) {

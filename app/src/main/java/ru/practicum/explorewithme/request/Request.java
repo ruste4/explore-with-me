@@ -22,19 +22,19 @@ public class Request {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id")
+    @JoinColumn(name = "event_id", nullable = false)
     @ToString.Exclude
     private Event event;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requester_id")
+    @JoinColumn(name = "requester_id", nullable = false)
     @ToString.Exclude
     private User requester;
 
-    @Column(name = "in_status")
+    @Column(name = "in_status", nullable = false)
     private RequestStatus status;
 
-    @Column(name = "created")
+    @Column(name = "created", nullable = false)
     private LocalDateTime created;
 
     @Override
