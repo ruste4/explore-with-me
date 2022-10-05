@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.event.exception;
+package ru.practicum.explorewithme.user.exception;
 
 import ru.practicum.explorewithme.exception.ConditionsNotMetException;
 
