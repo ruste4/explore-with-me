@@ -85,9 +85,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private Event findEventById(long id) {
-        return eventRepository.findById(id).orElseThrow(
-                () -> new EventNotFoundException(String.format("Event with id:%s not found", id))
-        );
+        return eventRepository.findById(id).orElseThrow(() -> new EventNotFoundException(id));
     }
 
     private Request findRequestById(long id) {

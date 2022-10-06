@@ -34,9 +34,7 @@ public class CommentMapper {
     }
 
     private Event findEventById(long eventId) {
-        return eventRepository.findById(eventId).orElseThrow(
-                () -> new EventNotFoundException(String.format("Event with id:$s not found", eventId))
-        );
+        return eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
     }
 
 }

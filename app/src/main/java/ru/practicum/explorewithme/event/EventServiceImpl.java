@@ -311,9 +311,7 @@ public class EventServiceImpl implements EventService {
             boolean isValidEventDate = eventUpdateDto.getEventDate().minusHours(BAN_HOURS_BEFORE_EVENT).isAfter(now);
 
             if (!isValidEventDate) {
-                throw new EventDateInvalidException(String.format(
-                        "It is forbidden to update events date no earlier than %s hours before the event",
-                        BAN_HOURS_BEFORE_EVENT));
+                throw new EventDateInvalidException(BAN_HOURS_BEFORE_EVENT);
             }
 
             event.setEventDate(eventUpdateDto.getEventDate());
@@ -346,9 +344,7 @@ public class EventServiceImpl implements EventService {
         }
 
         if (!isValidEventDate) {
-            throw new EventDateInvalidException(String.format(
-                    "It is forbidden to create events no earlier than %s hours before the event",
-                    BAN_HOURS_BEFORE_EVENT));
+            throw new EventDateInvalidException(BAN_HOURS_BEFORE_EVENT);
         }
 
 
@@ -499,9 +495,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private Event findEventById(long id) {
-        return eventRepository.findById(id).orElseThrow(
-                () -> new EventNotFoundException(String.format("Event with id:%s not found", id))
-        );
+        return eventRepository.findById(id).orElseThrow(() -> new EventNotFoundException(id));
     }
 
     private User findUserById(long id) {
@@ -526,9 +520,7 @@ public class EventServiceImpl implements EventService {
         boolean isInitiator = event.getInitiator().getId().equals(userId);
 
         if (!isInitiator) {
-            throw new UserIsNotInitiatorException(
-                    String.format("User with id:%s is not the initiator of the event with id:%s", userId, event.getId())
-            );
+            throw new UserIsNotInitiatorOfEventException(userId, event.getId());
         }
     }
 
