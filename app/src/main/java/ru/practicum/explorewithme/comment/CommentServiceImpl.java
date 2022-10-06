@@ -35,7 +35,7 @@ public class CommentServiceImpl implements CommentService {
         User user = findUserById(userId);
 
         if (!user.isActivated()) {
-            throw new UserNotActivatedException(String.format("User with id:%s not activated", userId));
+            throw new UserNotActivatedException(userId);
         }
 
         Comment comment = commentMapper.toComment(createDto);
@@ -57,7 +57,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         if (!user.isActivated()) {
-            throw new UserNotActivatedException(String.format("User with id:%s not activated", userId));
+            throw new UserNotActivatedException(userId);
         }
 
         comment.setText(updateDto.getText());
@@ -92,9 +92,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private User findUserById(long userId) {
-        return userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException(String.format("User with id:%s not found", userId))
-        );
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
     }
 
     private Comment findCommentById(long commentId) {

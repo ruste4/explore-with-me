@@ -340,7 +340,7 @@ public class EventServiceImpl implements EventService {
         User user = findUserById(userId);
 
         if (!user.isActivated()) {
-            throw new UserNotActivatedException(String.format("User with id:%s is not activated", userId));
+            throw new UserNotActivatedException(userId);
         }
 
         if (!isValidEventDate) {
@@ -499,11 +499,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private User findUserById(long id) {
-        return userRepository.findById(id).orElseThrow(
-                () -> new UserNotFoundException(
-                        String.format("User with id:%s not found", id)
-                )
-        );
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
     private List<Request> findRequestsByEvent(Event event) {
