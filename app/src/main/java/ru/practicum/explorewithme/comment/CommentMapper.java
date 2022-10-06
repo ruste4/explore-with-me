@@ -15,7 +15,7 @@ public class CommentMapper {
     private EventRepository eventRepository;
 
     public Comment toComment(CommentCreateDto createDto) {
-        Event event =  findEventById(createDto.getEvent());
+        Event event =  findEventById(createDto.getEventId());
 
         return Comment.builder()
                 .event(event)

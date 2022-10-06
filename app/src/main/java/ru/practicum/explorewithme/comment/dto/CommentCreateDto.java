@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 public class CommentCreateDto {
 
     @NonNull
-    private Long event;
+    private Long eventId;
 
     @NotBlank
     private String text;

@@ -59,7 +59,7 @@ class CommentServiceImplTest {
         Event event = generateAndPersistEvent();
         User commentator = generateAndPersistUser();
         CommentCreateDto createDto = CommentCreateDto.builder()
-                .event(event.getId())
+                .eventId(event.getId())
                 .text("Comment from addCommentSuccess test")
                 .build();
 
@@ -77,7 +77,7 @@ class CommentServiceImplTest {
         Event event = generateAndPersistEvent();
 
         CommentCreateDto createDto = CommentCreateDto.builder()
-                .event(event.getId())
+                .eventId(event.getId())
                 .text("Comment from addCommentSuccess test")
                 .build();
 
@@ -91,7 +91,7 @@ class CommentServiceImplTest {
         Event event = generateAndPersistEvent();
         User commentator = generateAndPersistUser();
         CommentCreateDto createDto = CommentCreateDto.builder()
-                .event(event.getId())
+                .eventId(event.getId())
                 .text("Comment from updateCommentSuccess test")
                 .build();
 
@@ -150,8 +150,9 @@ class CommentServiceImplTest {
 
     @Test
     public void getAllCommentsByEvent() {
+        int commentQuantity  = 5;
         Event event = generateAndPersistEvent();
-        List<Comment> comments = generateAndPersistCommentsForEvent(5, event);
+        List<Comment> comments = generateAndPersistCommentsForEvent(commentQuantity, event);
 
         List<Comment> foundComments = commentService.getAllCommentsByEvent(event.getId(), 0, 100);
 

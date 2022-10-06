@@ -31,7 +31,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentFullDto addCommentByCurrentUser(long userId, CommentCreateDto createDto) {
-        log.info("Add comment from user with id:{} by event with id:{}", userId, createDto.getEvent());
+        log.info("Add comment from user with id:{} by event with id:{}", userId, createDto.getEventId());
         User user = findUserById(userId);
 
         if (!user.isActivated()) {
