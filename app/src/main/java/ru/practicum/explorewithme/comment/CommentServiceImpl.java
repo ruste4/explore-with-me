@@ -9,7 +9,6 @@ import ru.practicum.explorewithme.comment.dto.CommentFullDto;
 import ru.practicum.explorewithme.comment.dto.CommentUpdateDto;
 import ru.practicum.explorewithme.comment.exception.CommentNotFoundException;
 import ru.practicum.explorewithme.comment.exception.UserNotAuthorOfCommentException;
-import ru.practicum.explorewithme.event.EventRepository;
 import ru.practicum.explorewithme.user.User;
 import ru.practicum.explorewithme.user.UserRepository;
 import ru.practicum.explorewithme.user.exception.UserNotActivatedException;
@@ -27,8 +26,6 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
 
     private final UserRepository userRepository;
-
-    private final EventRepository eventRepository;
 
     private final CommentMapper commentMapper;
 
@@ -56,9 +53,7 @@ public class CommentServiceImpl implements CommentService {
 
         boolean isAuthorOfComment = comment.getUser().equals(user);
         if (!isAuthorOfComment) {
-            throw new UserNotAuthorOfCommentException(
-                    String.format("User with id%s not author of comment with id:%s", user, comment.getId())
-            );
+            throw new UserNotAuthorOfCommentException(userId, comment.getId());
         }
 
         if (!user.isActivated()) {
@@ -79,9 +74,7 @@ public class CommentServiceImpl implements CommentService {
         boolean isAuthorComment = comment.getUser().equals(user);
 
         if (!isAuthorComment) {
-            throw new UserNotAuthorOfCommentException(
-                    String.format("User with id:%s not author for comment with id:%s", userId, commentId)
-            );
+            throw new UserNotAuthorOfCommentException(userId, commentId);
         }
 
         commentRepository.delete(comment);
@@ -105,8 +98,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private Comment findCommentById(long commentId) {
-        return commentRepository.findById(commentId).orElseThrow(
-                () -> new CommentNotFoundException(String.format("Comment with id:%s not found", commentId))
-        );
+        return commentRepository.findById(commentId).orElseThrow(() -> new CommentNotFoundException(commentId));
     }
 }
