@@ -511,9 +511,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private Request findRequestById(long reqId) {
-        return requestRepository.findById(reqId).orElseThrow(
-                () -> new RequestNotFoundException(String.format("Request with id:%s not found", reqId))
-        );
+        return requestRepository.findById(reqId).orElseThrow(() -> new RequestNotFoundException(reqId));
     }
 
     private void isInitiatorOrException(Event event, long userId) {

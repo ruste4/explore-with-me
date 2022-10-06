@@ -74,9 +74,7 @@ public class RequestServiceImpl implements RequestService {
         Request request = findRequestById(requestId);
 
         if (!request.getRequester().equals(user)) {
-            throw new UserNotRequesterForEventRequestException(
-                    String.format("User with id:%s does not requester for request with id:%s", userId, requestId)
-            );
+            throw new UserNotRequesterForEventRequestException(userId, requestId);
         }
 
         request.setStatus(RequestStatus.CANCELED);
@@ -89,9 +87,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private Request findRequestById(long id) {
-        return requestRepository.findById(id).orElseThrow(
-                () -> new RequestNotFoundException(String.format("Request with id:%s not found", id))
-        );
+        return requestRepository.findById(id).orElseThrow(() -> new RequestNotFoundException(id));
     }
 
     private User findUserById(long id) {
@@ -114,9 +110,7 @@ public class RequestServiceImpl implements RequestService {
                 .findFirst();
 
         if (foundDuplicate.isPresent()) {
-            throw new RequestAlreadyExistException(
-                    String.format("Request for event with id:%s on user with id:%s already exist", eventId, userId)
-            );
+            throw new RequestAlreadyExistException(eventId, userId);
         }
     }
 
@@ -130,7 +124,7 @@ public class RequestServiceImpl implements RequestService {
         boolean isEventInitiator = event.getInitiator().getId().equals(requester.getId());
 
         if (isEventInitiator) {
-            throw new RequesterIsInitiatorEventException("Requester cannot be initiator of event");
+            throw new RequesterIsInitiatorEventException(requester.getId(), event.getId());
         }
     }
 
@@ -141,7 +135,7 @@ public class RequestServiceImpl implements RequestService {
      */
     private void checkEventStateIsPublished(Event event) {
         if (!event.getState().equals(EventState.PUBLISHED)) {
-            throw new RequestUnpublishedEventException("Request to an unpublished event is prohibited");
+            throw new RequestUnpublishedEventException();
         }
     }
 
@@ -154,7 +148,7 @@ public class RequestServiceImpl implements RequestService {
         int requestCount = requestRepository.findAllByEvent(event).size();
         if (event.getParticipantLimit() > 0 && requestCount >= event.getParticipantLimit()) {
             throw new ParticipantLimitExceededException(
-                    String.format("Participant limit exceeded fro event with id:%s", event.getId())
+                    String.format("Participant limit exceeded for event with id:%s", event.getId())
             );
         }
     }
