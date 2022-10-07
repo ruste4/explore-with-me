@@ -12,11 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.explorewithme.compilation.dto.CompilationCreateDto;
 import ru.practicum.explorewithme.compilation.dto.CompilationDto;
 import ru.practicum.explorewithme.compilation.exception.CompilationNotFoundException;
+import ru.practicum.explorewithme.compilation.exception.EventAlreadyExistAtCompilationException;
 import ru.practicum.explorewithme.event.Event;
 import ru.practicum.explorewithme.event.EventState;
 import ru.practicum.explorewithme.event.Location;
 import ru.practicum.explorewithme.event.category.Category;
-import ru.practicum.explorewithme.event.exception.EventAlreadyExistException;
 import ru.practicum.explorewithme.event.exception.EventNotFoundException;
 import ru.practicum.explorewithme.user.User;
 
@@ -148,7 +148,7 @@ class CompilationServiceTest {
         compilationService.addEventToCompilation(compilation.getId(), event.getId());
 
         assertThrows(
-                EventAlreadyExistException.class,
+                EventAlreadyExistAtCompilationException.class,
                 () -> compilationService.addEventToCompilation(compilation.getId(), event.getId())
         );
     }

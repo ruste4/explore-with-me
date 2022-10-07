@@ -6,9 +6,10 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.compilation.dto.CompilationCreateDto;
 import ru.practicum.explorewithme.compilation.dto.CompilationDto;
 import ru.practicum.explorewithme.compilation.exception.CompilationNotFoundException;
+import ru.practicum.explorewithme.compilation.exception.EventAlreadyExistAtCompilationException;
 import ru.practicum.explorewithme.event.Event;
 import ru.practicum.explorewithme.event.EventRepository;
-import ru.practicum.explorewithme.event.exception.EventAlreadyExistException;
+import ru.practicum.explorewithme.event.exception.EventAtCompilationNotFoundException;
 import ru.practicum.explorewithme.event.exception.EventNotFoundException;
 
 import java.util.List;
@@ -50,13 +51,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (events.contains(event)) {
             events.remove(event);
         } else {
-            throw new EventNotFoundException(
-                    String.format(
-                            "Event with id:%s not found to event list from compilation with id:%s",
-                            eventId,
-                            compilationId
-                    )
-            );
+            throw new EventAtCompilationNotFoundException(eventId, compilationId);
         }
     }
 
@@ -67,9 +62,7 @@ public class CompilationServiceImpl implements CompilationService {
 
         List<Event> events = compilation.getEvents();
         if (events.contains(event)) {
-            throw new EventAlreadyExistException(
-                    String.format("Event with id:%s already exist to compilation with id:%s", eventId, compilationId)
-            );
+            throw new EventAlreadyExistAtCompilationException(eventId, compilationId);
         } else {
             events.add(event);
         }
@@ -102,15 +95,11 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private Compilation findCompilationById(long id) {
-        return compilationRepository.findById(id).orElseThrow(
-                () -> new CompilationNotFoundException(String.format("Compilation with id:%s not found", id))
-        );
+        return compilationRepository.findById(id).orElseThrow(() -> new CompilationNotFoundException(id));
     }
 
     private Event findEventById(Long id) {
-        return eventRepository.findById(id).orElseThrow(
-                () -> new EventNotFoundException(String.format("Event with id:%s not found", id))
-        );
+        return eventRepository.findById(id).orElseThrow(() -> new EventNotFoundException(id));
     }
 
     private List<Event> findEventByIds(List<Long> ids) {

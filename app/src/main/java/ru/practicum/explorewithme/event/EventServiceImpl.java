@@ -25,6 +25,7 @@ import ru.practicum.explorewithme.request.exception.ParticipantLimitExceededExce
 import ru.practicum.explorewithme.request.exception.RequestNotFoundException;
 import ru.practicum.explorewithme.user.User;
 import ru.practicum.explorewithme.user.UserRepository;
+import ru.practicum.explorewithme.user.exception.UserNotActivatedException;
 import ru.practicum.explorewithme.user.exception.UserNotFoundException;
 
 import javax.transaction.Transactional;
@@ -310,9 +311,7 @@ public class EventServiceImpl implements EventService {
             boolean isValidEventDate = eventUpdateDto.getEventDate().minusHours(BAN_HOURS_BEFORE_EVENT).isAfter(now);
 
             if (!isValidEventDate) {
-                throw new EventDateInvalidException(String.format(
-                        "It is forbidden to update events date no earlier than %s hours before the event",
-                        BAN_HOURS_BEFORE_EVENT));
+                throw new EventDateInvalidException(BAN_HOURS_BEFORE_EVENT);
             }
 
             event.setEventDate(eventUpdateDto.getEventDate());
@@ -341,13 +340,11 @@ public class EventServiceImpl implements EventService {
         User user = findUserById(userId);
 
         if (!user.isActivated()) {
-            throw new UserNotActivatedException(String.format("User with id:%s is not activated", userId));
+            throw new UserNotActivatedException(userId);
         }
 
         if (!isValidEventDate) {
-            throw new EventDateInvalidException(String.format(
-                    "It is forbidden to create events no earlier than %s hours before the event",
-                    BAN_HOURS_BEFORE_EVENT));
+            throw new EventDateInvalidException(BAN_HOURS_BEFORE_EVENT);
         }
 
 
@@ -498,17 +495,11 @@ public class EventServiceImpl implements EventService {
     }
 
     private Event findEventById(long id) {
-        return eventRepository.findById(id).orElseThrow(
-                () -> new EventNotFoundException(String.format("Event with id:%s not found", id))
-        );
+        return eventRepository.findById(id).orElseThrow(() -> new EventNotFoundException(id));
     }
 
     private User findUserById(long id) {
-        return userRepository.findById(id).orElseThrow(
-                () -> new UserNotFoundException(
-                        String.format("User with id:%s not found", id)
-                )
-        );
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
     private List<Request> findRequestsByEvent(Event event) {
@@ -516,18 +507,14 @@ public class EventServiceImpl implements EventService {
     }
 
     private Request findRequestById(long reqId) {
-        return requestRepository.findById(reqId).orElseThrow(
-                () -> new RequestNotFoundException(String.format("Request with id:%s not found", reqId))
-        );
+        return requestRepository.findById(reqId).orElseThrow(() -> new RequestNotFoundException(reqId));
     }
 
     private void isInitiatorOrException(Event event, long userId) {
         boolean isInitiator = event.getInitiator().getId().equals(userId);
 
         if (!isInitiator) {
-            throw new UserIsNotInitiatorException(
-                    String.format("User with id:%s is not the initiator of the event with id:%s", userId, event.getId())
-            );
+            throw new UserIsNotInitiatorOfEventException(userId, event.getId());
         }
     }
 
