@@ -5,17 +5,17 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.explorewithme.comment.CommentService;
+import ru.practicum.explorewithme.comment.CommentApiManager;
 
 @RestController
 @RequestMapping(path = "/admin/comments")
 @RequiredArgsConstructor
 public class CommentControllerForAdmin {
 
-    private final CommentService commentService;
+    private final CommentApiManager commentApiManager;
 
     @DeleteMapping("/{commentId}")
     public void deleteComment(@PathVariable long commentId) {
-        commentService.deleteComment(commentId);
+        commentApiManager.deleteComment(commentId);
     }
 }

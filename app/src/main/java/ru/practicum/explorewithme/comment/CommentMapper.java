@@ -4,26 +4,24 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.explorewithme.comment.dto.CommentCreateDto;
 import ru.practicum.explorewithme.comment.dto.CommentFullDto;
-import ru.practicum.explorewithme.event.Event;
-import ru.practicum.explorewithme.event.EventRepository;
-import ru.practicum.explorewithme.event.exception.EventNotFoundException;
+import ru.practicum.explorewithme.comment.dto.CommentUpdateDto;
 
 @Component
 @AllArgsConstructor
 public class CommentMapper {
 
-    private EventRepository eventRepository;
+    public static Comment toComment(CommentCreateDto createDto) {
+        return Comment.builder().text(createDto.getText()).build();
+    }
 
-    public Comment toComment(CommentCreateDto createDto) {
-        Event event =  findEventById(createDto.getEventId());
-
+    public static Comment toComment(CommentUpdateDto updateDto) {
         return Comment.builder()
-                .event(event)
-                .text(createDto.getText())
+                .id(updateDto.getId())
+                .text(updateDto.getText())
                 .build();
     }
 
-    public CommentFullDto toCommentFullDto(Comment comment) {
+    public static CommentFullDto toCommentFullDto(Comment comment) {
         return CommentFullDto.builder()
                 .id(comment.getId())
                 .user(comment.getUser().getId())
@@ -31,10 +29,6 @@ public class CommentMapper {
                 .createdOn(comment.getCreatedOn())
                 .text(comment.getText())
                 .build();
-    }
-
-    private Event findEventById(long eventId) {
-        return eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
     }
 
 }

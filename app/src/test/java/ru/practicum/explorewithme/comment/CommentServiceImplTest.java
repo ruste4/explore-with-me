@@ -9,16 +9,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.practicum.explorewithme.comment.dto.CommentCreateDto;
-import ru.practicum.explorewithme.comment.dto.CommentFullDto;
-import ru.practicum.explorewithme.comment.dto.CommentUpdateDto;
 import ru.practicum.explorewithme.comment.exception.UserNotAuthorOfCommentException;
 import ru.practicum.explorewithme.event.Event;
 import ru.practicum.explorewithme.event.EventState;
 import ru.practicum.explorewithme.event.Location;
 import ru.practicum.explorewithme.event.category.Category;
 import ru.practicum.explorewithme.user.User;
-import ru.practicum.explorewithme.user.exception.UserNotActivatedException;
 
 import javax.transaction.Transactional;
 
@@ -58,84 +54,60 @@ class CommentServiceImplTest {
     public void addCommentSuccess() {
         Event event = generateAndPersistEvent();
         User commentator = generateAndPersistUser();
-        CommentCreateDto createDto = CommentCreateDto.builder()
-                .eventId(event.getId())
+        Comment comment = Comment.builder()
+                .event(event)
+                .user(commentator)
                 .text("Comment from addCommentSuccess test")
                 .build();
 
-        CommentFullDto addedComment = commentService.addCommentByCurrentUser(commentator.getId(), createDto);
+        Comment addedComment = commentService.addComment(comment);
 
-        Comment comment = testEntityManager.find(Comment.class, addedComment.getId());
+        Comment foundComment = testEntityManager.find(Comment.class, addedComment.getId());
 
-        assertEquals(addedComment.getText(), comment.getText());
-    }
-
-    @Test
-    public void addCommentFailUserNotActivated() {
-        User user = generateAndPersistUser();
-        user.setActivated(false);
-        Event event = generateAndPersistEvent();
-
-        CommentCreateDto createDto = CommentCreateDto.builder()
-                .eventId(event.getId())
-                .text("Comment from addCommentSuccess test")
-                .build();
-
-        assertThrows(UserNotActivatedException.class,
-                () -> commentService.addCommentByCurrentUser(user.getId(), createDto)
-        );
+        assertEquals(addedComment.getText(), foundComment.getText());
     }
 
     @Test
     public void updateCommentSuccess() {
         Event event = generateAndPersistEvent();
         User commentator = generateAndPersistUser();
-        CommentCreateDto createDto = CommentCreateDto.builder()
-                .eventId(event.getId())
-                .text("Comment from updateCommentSuccess test")
+
+        Comment comment = Comment.builder()
+                .event(event)
+                .user(commentator)
+                .text("Comment from addCommentSuccess test")
                 .build();
 
-        CommentFullDto addedComment = commentService.addCommentByCurrentUser(commentator.getId(), createDto);
+        Comment addedComment = commentService.addComment(comment);
 
-        String updatedText = "Updated text";
-
-        CommentUpdateDto updateDto = CommentUpdateDto.builder()
+        Comment updatedComment = Comment.builder()
                 .id(addedComment.getId())
-                .text(updatedText)
+                .event(event)
+                .user(commentator)
+                .text("Updated text")
                 .build();
 
-        commentService.updateCommentByCurrentUser(commentator.getId(), updateDto);
+        commentService.updateComment(updatedComment);
 
         Comment found = testEntityManager.find(Comment.class, addedComment.getId());
 
-        assertEquals(updatedText, found.getText());
+        assertEquals(updatedComment.getText(), found.getText());
     }
 
     @Test
     public void updateCommentFailUserNotAuthor() {
         Comment comment = generateAndPersistComment();
         User otherUser = generateAndPersistUser();
-        CommentUpdateDto updateDto = CommentUpdateDto.builder()
+
+        Comment updatedComment = Comment.builder()
                 .id(comment.getId())
-                .text("Updated comment")
+                .event(comment.getEvent())
+                .user(otherUser)
+                .text("Updated text")
                 .build();
 
         assertThrows(UserNotAuthorOfCommentException.class,
-                () -> commentService.updateCommentByCurrentUser(otherUser.getId(), updateDto)
-        );
-    }
-
-    @Test
-    public void updateCommentFailUserNotActivated() {
-        Comment comment = generateAndPersistComment();
-        comment.getUser().setActivated(false);
-        CommentUpdateDto updateDto = CommentUpdateDto.builder()
-                .id(comment.getId())
-                .text("Updated comment")
-                .build();
-
-        assertThrows(UserNotActivatedException.class,
-                () -> commentService.updateCommentByCurrentUser(comment.getUser().getId(), updateDto)
+                () -> commentService.updateComment(updatedComment)
         );
     }
 
@@ -150,7 +122,7 @@ class CommentServiceImplTest {
 
     @Test
     public void getAllCommentsByEvent() {
-        int commentQuantity  = 5;
+        int commentQuantity = 5;
         Event event = generateAndPersistEvent();
         List<Comment> comments = generateAndPersistCommentsForEvent(commentQuantity, event);
 

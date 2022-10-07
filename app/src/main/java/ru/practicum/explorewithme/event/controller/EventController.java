@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.client.StatisticClient;
-import ru.practicum.explorewithme.comment.Comment;
-import ru.practicum.explorewithme.comment.CommentService;
+import ru.practicum.explorewithme.comment.CommentApiManager;
+import ru.practicum.explorewithme.comment.dto.CommentFullDto;
 import ru.practicum.explorewithme.event.EventService;
 import ru.practicum.explorewithme.event.EventSort;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
@@ -27,7 +27,7 @@ public class EventController {
     private final EventService eventService;
     private final StatisticClient statisticClient;
 
-    private final CommentService commentService;
+    private final CommentApiManager commentApiManager;
 
     @GetMapping
     public List<EventShortDto> getEventsWithFiltering(
@@ -69,11 +69,11 @@ public class EventController {
     }
 
     @GetMapping("/{eventId}/comments")
-    public List<Comment> getCommentsByEvent(
+    public List<CommentFullDto> getCommentsByEvent(
             @PathVariable long eventId,
             @PositiveOrZero @RequestParam int from,
             @Positive @RequestParam int size
     ) {
-        return commentService.getAllCommentsByEvent(eventId, from, size);
+        return commentApiManager.getAllCommentsByEvent(eventId, from, size);
     }
 }
