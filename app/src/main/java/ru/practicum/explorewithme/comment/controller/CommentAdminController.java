@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.explorewithme.comment.CommentApiManager;
 
 @RestController
-@RequestMapping(path = "/admin/comments")
+@RequestMapping(path = "/admin/comments/{commentId}")
 @RequiredArgsConstructor
-public class CommentControllerForAdmin {
+public class CommentAdminController {
 
     private final CommentApiManager commentApiManager;
 
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping
     public void deleteComment(@PathVariable long commentId) {
         commentApiManager.deleteComment(commentId);
     }

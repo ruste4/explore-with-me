@@ -24,8 +24,8 @@ public class CommentMapper {
     public static CommentFullDto toCommentFullDto(Comment comment) {
         return CommentFullDto.builder()
                 .id(comment.getId())
-                .user(comment.getUser().getId())
-                .event(comment.getEvent().getId())
+                .userId(comment.getUser().getId())
+                .eventId(comment.getEvent().getId())
                 .createdOn(comment.getCreatedOn())
                 .text(comment.getText())
                 .build();

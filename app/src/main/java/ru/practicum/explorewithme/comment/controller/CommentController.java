@@ -11,14 +11,14 @@ import ru.practicum.explorewithme.comment.dto.CommentUpdateDto;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping(path = "/users")
+@RequestMapping(path = "/users/{userId}/comments")
 @RequiredArgsConstructor
 @Validated
-public class CommentControllerForUser {
+public class CommentController {
 
     private final CommentApiManager commentApiManager;
 
-    @PostMapping("/{userId}/comments")
+    @PostMapping
     public CommentFullDto addComment(
             @PathVariable long userId,
             @RequestBody @Valid CommentCreateDto createDto
@@ -26,7 +26,7 @@ public class CommentControllerForUser {
         return commentApiManager.addCommentByCurrentUser(userId, createDto);
     }
 
-    @PutMapping("/{userId}/comments")
+    @PutMapping
     public CommentFullDto updateComment(
             @PathVariable long userId,
             @RequestBody @Valid CommentUpdateDto updateDto
@@ -34,7 +34,7 @@ public class CommentControllerForUser {
         return commentApiManager.updateCommentByCurrentUser(userId, updateDto);
     }
 
-    @DeleteMapping("/{userId}/comments/{commentId}")
+    @DeleteMapping("/{commentId}")
     public void deleteUser(@PathVariable long userId, @PathVariable long commentId) {
         commentApiManager.deleteCommentByCurrentUser(userId, commentId);
     }

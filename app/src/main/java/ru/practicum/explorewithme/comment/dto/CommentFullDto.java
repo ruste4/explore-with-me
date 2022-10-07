@@ -11,9 +11,9 @@ public class CommentFullDto {
 
     private Long id;
 
-    private Long user;
+    private Long userId;
 
-    private Long event;
+    private Long eventId;
 
     private LocalDateTime createdOn;
 
